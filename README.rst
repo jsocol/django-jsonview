@@ -120,7 +120,7 @@ install Django (the only requirement) with ``pip``::
 
 Then run the tests with::
 
-    ./runtests.sh
+    ./run.sh test
 
 
 .. _logger:
