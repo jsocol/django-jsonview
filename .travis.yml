@@ -8,5 +8,4 @@ env:
  - DJANGO_VERSION=1.5c1
 install:
  - pip install -qe git+https://github.com/django/django.git@${DJANGO_VERSION}#egg=Django
- - pip install -q --use-mirrors nose==1.2.1
 script: ./runtests.sh

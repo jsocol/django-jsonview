@@ -114,9 +114,9 @@ Running Tests
 -------------
 
 To run the tests, you probably want to create a virtualenv_, then
-install the requirements with ``pip``::
+install Django (the only requirement) with ``pip``::
 
-    pip install -r requirements
+    pip install Django==${DJANGO_VERSION}
 
 Then run the tests with::
 

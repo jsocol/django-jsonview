@@ -4,14 +4,17 @@ from django import http
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
 
-from nose.tools import eq_
-
 from .decorators import json_view
 from .exceptions import BadRequest
 
 
 JSON = 'application/json'
 rf = RequestFactory()
+
+
+def eq_(a, b, msg=None):
+    """From nose.tools.eq_."""
+    assert a == b, msg or '%r != %r' % (a, b)
 
 
 class JsonViewTests(TestCase):
