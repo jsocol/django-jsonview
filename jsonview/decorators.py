@@ -70,12 +70,6 @@ def json_view(f):
                                'request': request,
                            })
             return http.HttpResponseNotFound(blob, content_type=JSON)
-        except http.HttpResponseNotAllowed as e:
-            blob = json.dumps({
-                'error': 405,
-                'message': str(e),
-            })
-            return http.HttpResponseNotAllowed(blob, content_type=JSON)
         except PermissionDenied as e:
             logger.warning('Forbidden (Permission denied): %s', request.path,
                            extra={

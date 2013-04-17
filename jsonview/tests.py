@@ -3,6 +3,7 @@ import json
 from django import http
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
+from django.views.decorators.http import require_POST
 
 import mock
 
@@ -88,8 +89,9 @@ class JsonViewTests(TestCase):
 
     def test_not_allowed(self):
         @json_view
+        @require_POST
         def temp(req):
-            return http.HttpResponseNotAllowed('fail')
+            return {}
 
         res = temp(rf.get('/'))
         eq_(405, res.status_code)
