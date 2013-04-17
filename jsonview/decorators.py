@@ -4,6 +4,7 @@ from functools import wraps
 
 from django import http
 from django.core.exceptions import PermissionDenied
+from django.core.handlers.base import BaseHandler
 from django.core.signals import got_request_exception
 
 from .exceptions import BadRequest
@@ -88,5 +89,11 @@ def json_view(f):
                 'message': str(e),
             })
             logger.exception(str(e))
+
+            # Here we lie a little bit. Because we swallow the exception, the
+            # BaseHandler doesn't get to send this signal. It sets the sender
+            # argument to self.__class__, in case the BaseHandler is
+            # subclassed.
+            got_request_exception.send(sender=BaseHandler, request=req)
             return http.HttpResponseServerError(blob, content_type=JSON)
     return _wrapped

@@ -4,6 +4,8 @@ from django import http
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
 
+import mock
+
 from .decorators import json_view
 from .exceptions import BadRequest
 
@@ -127,3 +129,16 @@ class JsonViewTests(TestCase):
         eq_('Bar', res['X-Foo'])
         data = json.loads(res.content)
         eq_({}, data)
+
+    def test_signal_sent(self):
+        from . import decorators
+
+        @json_view
+        def temp(req):
+            [][0]  # sic.
+
+        with mock.patch.object(decorators, 'got_request_exception') as s:
+            res = temp(rf.get('/'))
+
+        assert s.send.called
+        eq_(JSON, res['content-type'])

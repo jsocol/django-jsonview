@@ -84,6 +84,12 @@ exception, log it to the normal ``django.request`` logger_, and return a
 JSON response with a status of 500 and a body that looks like the
 exceptions in the `Return Values`_ section.
 
+.. note::
+
+   Because the ``@json_view`` decorator handles the exception instead of
+   propagating it, any exception middleware will **not** be called, and
+   any response middleware **will** be called.
+
 
 Status Codes
 ------------
@@ -129,9 +135,9 @@ Running Tests
 -------------
 
 To run the tests, you probably want to create a virtualenv_, then
-install Django (the only requirement) with ``pip``::
+install Django and Mock with ``pip``::
 
-    pip install Django==${DJANGO_VERSION}
+    pip install Django==${DJANGO_VERSION} mock==1.0.1
 
 Then run the tests with::
 
