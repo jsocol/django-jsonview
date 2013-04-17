@@ -35,11 +35,11 @@ def json_view(f):
     """
 
     @wraps(f)
-    def _wrapped(req, *a, **kw):
+    def _wrapped(request, *a, **kw):
         try:
             status = 200
             headers = {}
-            ret = f(req, *a, **kw)
+            ret = f(request, *a, **kw)
 
             if isinstance(ret, tuple):
                 if len(ret) == 3:
@@ -55,15 +55,20 @@ def json_view(f):
                 })
                 return http.HttpResponse(blob, status=405, content_type=JSON)
             blob = json.dumps(ret)
-            res = http.HttpResponse(blob, status=status, content_type=JSON)
+            response = http.HttpResponse(blob, status=status, content_type=JSON)
             for k in headers:
-                res[k] = headers[k]
-            return res
+                response[k] = headers[k]
+            return response
         except http.Http404 as e:
             blob = json.dumps({
                 'error': 404,
                 'message': str(e),
             })
+            logger.warning('Not found: %s', request.path,
+                           extra={
+                               'status_code': 404,
+                               'request': request,
+                           })
             return http.HttpResponseNotFound(blob, content_type=JSON)
         except http.HttpResponseNotAllowed as e:
             blob = json.dumps({
@@ -72,6 +77,11 @@ def json_view(f):
             })
             return http.HttpResponseNotAllowed(blob, content_type=JSON)
         except PermissionDenied as e:
+            logger.warning('Forbidden (Permission denied): %s', request.path,
+                           extra={
+                               'status_code': 403,
+                               'request': request,
+                           })
             blob = json.dumps({
                 'error': 403,
                 'message': str(e),
@@ -94,6 +104,6 @@ def json_view(f):
             # BaseHandler doesn't get to send this signal. It sets the sender
             # argument to self.__class__, in case the BaseHandler is
             # subclassed.
-            got_request_exception.send(sender=BaseHandler, request=req)
+            got_request_exception.send(sender=BaseHandler, request=request)
             return http.HttpResponseServerError(blob, content_type=JSON)
     return _wrapped
