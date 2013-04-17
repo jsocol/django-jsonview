@@ -101,6 +101,21 @@ is the integer status code::
         return {'subscribed': True}
 
 
+Extra Headers
+-------------
+
+You can add custom headers to the response by returning a tuple of three
+values: an object, a status code, and a dictionary of headers.
+
+::
+
+    @json_view
+    def myview(request):
+        return {}, 200, {'X-Server': 'myserver'}
+
+Custom header values may be overwritten by response middleware.
+
+
 Contributing
 ============
 

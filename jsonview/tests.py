@@ -116,3 +116,14 @@ class JsonViewTests(TestCase):
         eq_(JSON, res['content-type'])
         data = json.loads(res.content)
         eq_({}, data)
+
+    def test_headers(self):
+        @json_view
+        def temp(req):
+            return {}, 302, {'X-Foo': 'Bar'}
+        res = temp(rf.get('/'))
+        eq_(302, res.status_code)
+        eq_(JSON, res['content-type'])
+        eq_('Bar', res['X-Foo'])
+        data = json.loads(res.content)
+        eq_({}, data)

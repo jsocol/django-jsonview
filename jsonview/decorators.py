@@ -4,6 +4,7 @@ from functools import wraps
 
 from django import http
 from django.core.exceptions import PermissionDenied
+from django.core.signals import got_request_exception
 
 from .exceptions import BadRequest
 
@@ -35,11 +36,15 @@ def json_view(f):
     @wraps(f)
     def _wrapped(req, *a, **kw):
         try:
+            status = 200
+            headers = {}
             ret = f(req, *a, **kw)
+
             if isinstance(ret, tuple):
-                ret, status = ret
-            else:
-                status = 200
+                if len(ret) == 3:
+                    ret, status, headers = ret
+                else:
+                    ret, status = ret
 
             # Some errors are not exceptions. :\
             if isinstance(ret, http.HttpResponseNotAllowed):
@@ -49,7 +54,10 @@ def json_view(f):
                 })
                 return http.HttpResponse(blob, status=405, content_type=JSON)
             blob = json.dumps(ret)
-            return http.HttpResponse(blob, status=status, content_type=JSON)
+            res = http.HttpResponse(blob, status=status, content_type=JSON)
+            for k in headers:
+                res[k] = headers[k]
+            return res
         except http.Http404 as e:
             blob = json.dumps({
                 'error': 404,
