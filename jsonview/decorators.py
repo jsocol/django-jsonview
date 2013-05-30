@@ -62,7 +62,7 @@ def json_view(f):
         except http.Http404 as e:
             blob = json.dumps({
                 'error': 404,
-                'message': str(e),
+                'message': unicode(e),
             })
             logger.warning('Not found: %s', request.path,
                            extra={
@@ -78,21 +78,21 @@ def json_view(f):
                            })
             blob = json.dumps({
                 'error': 403,
-                'message': str(e),
+                'message': unicode(e),
             })
             return http.HttpResponseForbidden(blob, content_type=JSON)
         except BadRequest as e:
             blob = json.dumps({
                 'error': 400,
-                'message': str(e),
+                'message': unicode(e),
             })
             return http.HttpResponseBadRequest(blob, content_type=JSON)
         except Exception as e:
             blob = json.dumps({
                 'error': 500,
-                'message': str(e),
+                'message': unicode(e),
             })
-            logger.exception(str(e))
+            logger.exception(unicode(e))
 
             # Here we lie a little bit. Because we swallow the exception, the
             # BaseHandler doesn't get to send this signal. It sets the sender

@@ -144,3 +144,13 @@ class JsonViewTests(TestCase):
 
         assert s.send.called
         eq_(JSON, res['content-type'])
+
+    def test_unicode_error(self):
+        @json_view
+        def temp(req):
+            raise http.Http404(u'page \xe7\xe9 not found')
+
+        res = temp(rf.get(u'/\xe7\xe9'))
+        eq_(404, res.status_code)
+        data = json.loads(res.content)
+        assert u'\xe7\xe9' in data['message']
