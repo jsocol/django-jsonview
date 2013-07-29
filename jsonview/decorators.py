@@ -29,8 +29,8 @@ def json_view(f):
     the second is an integer used for the HTTP status code, e.g.:
 
     >>> @json_view
-    >>> def example(request):
-    >>>    return {'foo': 'bar'}, 418
+    ... def example(request):
+    ...    return {'foo': 'bar'}, 418
 
     """
 
@@ -55,7 +55,8 @@ def json_view(f):
                 })
                 return http.HttpResponse(blob, status=405, content_type=JSON)
             blob = json.dumps(ret)
-            response = http.HttpResponse(blob, status=status, content_type=JSON)
+            response = http.HttpResponse(blob, status=status,
+                                         content_type=JSON)
             for k in headers:
                 response[k] = headers[k]
             return response
