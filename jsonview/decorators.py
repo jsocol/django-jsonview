@@ -1,17 +1,19 @@
-import json
 import logging
 from functools import wraps
 
 from django import http
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.signals import got_request_exception
+from django.utils.importlib import import_module
 
 from .exceptions import BadRequest
 
-
+json = import_module(getattr(settings, 'JSON_MODULE', 'json'))
 JSON = 'application/json'
 logger = logging.getLogger('django.request')
+logger.info('Using %s JSON module.', json.__name__)
 
 
 def json_view(f):

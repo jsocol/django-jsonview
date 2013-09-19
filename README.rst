@@ -122,6 +122,20 @@ values: an object, a status code, and a dictionary of headers.
 Custom header values may be overwritten by response middleware.
 
 
+Alternative JSON Implementations
+================================
+
+There is a healthy collection of JSON parsing and generating libraries
+out there. By default, it will use the old standby, the stdlib ``json``
+module. But, if you'd rather use ujson_, or cjson_ or yajl_, you should
+go for it. Just add this to your Django settings::
+
+    JSON_MODULE = 'ujson'
+
+Anything, as long as it's a module that has ``.loads()`` and ``.dumps()``
+methods, it.
+
+
 Contributing
 ============
 
