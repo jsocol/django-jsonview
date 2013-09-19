@@ -27,7 +27,6 @@ class JsonViewTests(TestCase):
             'baz': 'qux',
             'quz': [{'foo': 'bar'}],
         }
-        expect = json.dumps(data)
 
         @json_view
         def temp(req):
@@ -35,12 +34,11 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(expect, res.content)
+        eq_(data, json.loads(res.content))
         eq_(JSON, res['content-type'])
 
     def test_list(self):
         data = ['foo', 'bar', 'baz']
-        expect = json.dumps(data)
 
         @json_view
         def temp(req):
@@ -48,7 +46,7 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(expect, res.content)
+        eq_(data, json.loads(res.content))
         eq_(JSON, res['content-type'])
 
     def test_404(self):
