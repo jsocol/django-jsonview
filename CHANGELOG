@@ -1,0 +1,28 @@
+Changelog
+=========
+
+v0.2.2
+------
+
+- Can now specify a json module instead of always using stadard library.
+
+
+v0.2.1
+------
+
+- Fix issue handling unicode in exceptions.
+
+
+v0.2.0
+------
+
+- Propertly emit exception signal to play nicely with e.g. Raven.
+- Can return custom headers along with response code.
+- Follow more Django core conventions for logging.
+- Testing infrasctructure clean up.
+
+
+v0.1.1
+------
+
+- First release
