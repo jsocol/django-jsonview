@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import json
 
 from django import http
@@ -146,9 +147,9 @@ class JsonViewTests(TestCase):
     def test_unicode_error(self):
         @json_view
         def temp(req):
-            raise http.Http404(u'page \xe7\xe9 not found')
+            raise http.Http404('page \xe7\xe9 not found')
 
-        res = temp(rf.get(u'/\xe7\xe9'))
+        res = temp(rf.get('/\xe7\xe9'))
         eq_(404, res.status_code)
         data = json.loads(res.content.decode("utf-8"))
-        assert u'\xe7\xe9' in data['message']
+        assert '\xe7\xe9' in data['message']
