@@ -8,6 +8,10 @@ from django.core.handlers.base import BaseHandler
 from django.core.signals import got_request_exception
 from django.utils.importlib import import_module
 
+import sys
+if sys.version_info[0] == 3:
+    unicode = str
+
 from .exceptions import BadRequest
 
 json = import_module(getattr(settings, 'JSON_MODULE', 'json'))

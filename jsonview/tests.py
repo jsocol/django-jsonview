@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import json
 
 from django import http
@@ -34,7 +35,7 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(data, json.loads(res.content))
+        eq_(data, json.loads(res.content.decode("utf-8")))
         eq_(JSON, res['content-type'])
 
     def test_list(self):
@@ -46,7 +47,7 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(data, json.loads(res.content))
+        eq_(data, json.loads(res.content.decode("utf-8")))
         eq_(JSON, res['content-type'])
 
     def test_404(self):
@@ -57,7 +58,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(404, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_(404, data['error'])
         eq_('foo', data['message'])
 
@@ -69,7 +70,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(403, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_(403, data['error'])
         eq_('bar', data['message'])
 
@@ -81,7 +82,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(400, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_(400, data['error'])
         eq_('baz', data['message'])
 
@@ -94,7 +95,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(405, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_(405, data['error'])
 
     def test_server_error(self):
@@ -105,7 +106,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(500, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_(500, data['error'])
         eq_('fail', data['message'])
 
@@ -116,7 +117,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(402, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_({}, data)
 
     def test_headers(self):
@@ -127,7 +128,7 @@ class JsonViewTests(TestCase):
         eq_(302, res.status_code)
         eq_(JSON, res['content-type'])
         eq_('Bar', res['X-Foo'])
-        data = json.loads(res.content)
+        data = json.loads(res.content.decode("utf-8"))
         eq_({}, data)
 
     def test_signal_sent(self):
@@ -146,9 +147,9 @@ class JsonViewTests(TestCase):
     def test_unicode_error(self):
         @json_view
         def temp(req):
-            raise http.Http404(u'page \xe7\xe9 not found')
+            raise http.Http404('page \xe7\xe9 not found')
 
-        res = temp(rf.get(u'/\xe7\xe9'))
+        res = temp(rf.get('/\xe7\xe9'))
         eq_(404, res.status_code)
-        data = json.loads(res.content)
-        assert u'\xe7\xe9' in data['message']
+        data = json.loads(res.content.decode("utf-8"))
+        assert '\xe7\xe9' in data['message']
