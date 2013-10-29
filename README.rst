@@ -3,6 +3,9 @@ django-jsonview
 ===============
 
 
+.. image:: https://travis-ci.org/jsocol/django-jsonview.png?branch=master
+   :target: https://travis-ci.org/jsocol/django-jsonview
+
 **django-jsonview** is a simple decorator that translates Python objects
 to JSON and makes sure your view will always return JSON.
 
