@@ -153,3 +153,16 @@ class JsonViewTests(TestCase):
         eq_(404, res.status_code)
         data = json.loads(res.content.decode("utf-8"))
         assert '\xe7\xe9' in data['message']
+
+    def test_override_content_type(self):
+        testtype = "application/vnd.helloworld+json"
+        data = {"foo": "bar"}
+
+        @json_view(content_type=testtype)
+        def temp(req):
+            return data
+
+        res = temp(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(data, json.loads(res.content.decode("utf-8")))
+        eq_(testtype, res['content-type'])
