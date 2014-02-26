@@ -60,7 +60,12 @@ def json_view(f):
                     'message': 'HTTP method not allowed.'
                 })
                 return http.HttpResponse(blob, status=405, content_type=JSON)
-            blob = json.dumps(ret)
+
+            if isinstance(ret, (str, unicode)):
+                blob = ret
+            else:
+                blob = json.dumps(ret)
+
             response = http.HttpResponse(blob, status=status,
                                          content_type=JSON)
             for k in headers:
