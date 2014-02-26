@@ -25,7 +25,8 @@ def json_view(f):
 
     Views wrapped in @json_view can return JSON-serializable Python objects,
     like lists and dicts, and the decorator will serialize the output and set
-    the correct Content-type.
+    the correct Content-type. If view returns string, it will be considered as
+    already serialized JSON, e.g., cached value.
 
     Views may also throw known exceptions, like Http404, PermissionDenied, etc,
     and @json_view will convert the response to a standard JSON error format,
@@ -60,7 +61,12 @@ def json_view(f):
                     'message': 'HTTP method not allowed.'
                 })
                 return http.HttpResponse(blob, status=405, content_type=JSON)
-            blob = json.dumps(ret)
+
+            if isinstance(ret, (str, unicode)):
+                blob = ret
+            else:
+                blob = json.dumps(ret)
+
             response = http.HttpResponse(blob, status=status,
                                          content_type=JSON)
             for k in headers:
