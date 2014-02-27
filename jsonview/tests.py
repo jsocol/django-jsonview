@@ -50,6 +50,19 @@ class JsonViewTests(TestCase):
         eq_(data, json.loads(res.content.decode("utf-8")))
         eq_(JSON, res['content-type'])
 
+    def test_json_http_response(self):
+        data = ['foo', 'bar', 'baz']
+        data_json_str = '["foo", "bar", "baz"]'
+
+        @json_view
+        def temp(req):
+            return http.HttpResponse(data_json_str, JSON)
+
+        res = temp(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(data, json.loads(res.content.decode('utf-8')))
+        eq_(JSON, res['content-type'])
+
     def test_404(self):
         @json_view
         def temp(req):
