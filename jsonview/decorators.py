@@ -20,7 +20,7 @@ logger = logging.getLogger('django.request')
 logger.info('Using %s JSON module.', json.__name__)
 
 
-def json_view(f):
+def json_view(*decoargs, **decokwargs):
     """Ensure the response content is well-formed JSON.
 
     Views wrapped in @json_view can return JSON-serializable Python objects,
@@ -38,73 +38,90 @@ def json_view(f):
     ... def example(request):
     ...    return {'foo': 'bar'}, 418
 
+    By default all responses will get application/json as their content type.
+    You can override it for non-error responses by giving the content_type
+    keyword parameter to the decorator, e.g.:
+
+    >>> @json_view(content_type="application/vnd.example-v1.0+json")
+    ... def example2(request):
+    ...     return {'foo': 'bar'}
+
     """
 
-    @wraps(f)
-    def _wrapped(request, *a, **kw):
-        try:
-            status = 200
-            headers = {}
-            ret = f(request, *a, **kw)
+    content_type = decokwargs.get("content_type", JSON)
 
-            if isinstance(ret, tuple):
-                if len(ret) == 3:
-                    ret, status, headers = ret
-                else:
-                    ret, status = ret
+    def deco(f):
+        @wraps(f)
+        def _wrapped(request, *a, **kw):
+            try:
+                status = 200
+                headers = {}
+                ret = f(request, *a, **kw)
 
-            # Some errors are not exceptions. :\
-            if isinstance(ret, http.HttpResponseNotAllowed):
+                if isinstance(ret, tuple):
+                    if len(ret) == 3:
+                        ret, status, headers = ret
+                    else:
+                        ret, status = ret
+
+                # Some errors are not exceptions. :\
+                if isinstance(ret, http.HttpResponseNotAllowed):
+                    blob = json.dumps({
+                        'error': 405,
+                        'message': 'HTTP method not allowed.'
+                    })
+                    return http.HttpResponse(
+                        blob, status=405, content_type=JSON)
+                blob = json.dumps(ret)
+                response = http.HttpResponse(blob, status=status,
+                                             content_type=content_type)
+                for k in headers:
+                    response[k] = headers[k]
+                return response
+            except http.Http404 as e:
                 blob = json.dumps({
-                    'error': 405,
-                    'message': 'HTTP method not allowed.'
+                    'error': 404,
+                    'message': unicode(e),
                 })
-                return http.HttpResponse(blob, status=405, content_type=JSON)
-            blob = json.dumps(ret)
-            response = http.HttpResponse(blob, status=status,
-                                         content_type=JSON)
-            for k in headers:
-                response[k] = headers[k]
-            return response
-        except http.Http404 as e:
-            blob = json.dumps({
-                'error': 404,
-                'message': unicode(e),
-            })
-            logger.warning('Not found: %s', request.path,
-                           extra={
-                               'status_code': 404,
-                               'request': request,
-                           })
-            return http.HttpResponseNotFound(blob, content_type=JSON)
-        except PermissionDenied as e:
-            logger.warning('Forbidden (Permission denied): %s', request.path,
-                           extra={
-                               'status_code': 403,
-                               'request': request,
-                           })
-            blob = json.dumps({
-                'error': 403,
-                'message': unicode(e),
-            })
-            return http.HttpResponseForbidden(blob, content_type=JSON)
-        except BadRequest as e:
-            blob = json.dumps({
-                'error': 400,
-                'message': unicode(e),
-            })
-            return http.HttpResponseBadRequest(blob, content_type=JSON)
-        except Exception as e:
-            blob = json.dumps({
-                'error': 500,
-                'message': unicode(e),
-            })
-            logger.exception(unicode(e))
+                logger.warning('Not found: %s', request.path,
+                               extra={
+                                   'status_code': 404,
+                                   'request': request,
+                               })
+                return http.HttpResponseNotFound(blob, content_type=JSON)
+            except PermissionDenied as e:
+                logger.warning(
+                    'Forbidden (Permission denied): %s', request.path,
+                    extra={
+                        'status_code': 403,
+                        'request': request,
+                    })
+                blob = json.dumps({
+                    'error': 403,
+                    'message': unicode(e),
+                })
+                return http.HttpResponseForbidden(blob, content_type=JSON)
+            except BadRequest as e:
+                blob = json.dumps({
+                    'error': 400,
+                    'message': unicode(e),
+                })
+                return http.HttpResponseBadRequest(blob, content_type=JSON)
+            except Exception as e:
+                blob = json.dumps({
+                    'error': 500,
+                    'message': unicode(e),
+                })
+                logger.exception(unicode(e))
 
-            # Here we lie a little bit. Because we swallow the exception, the
-            # BaseHandler doesn't get to send this signal. It sets the sender
-            # argument to self.__class__, in case the BaseHandler is
-            # subclassed.
-            got_request_exception.send(sender=BaseHandler, request=request)
-            return http.HttpResponseServerError(blob, content_type=JSON)
-    return _wrapped
+                # Here we lie a little bit. Because we swallow the exception,
+                # the BaseHandler doesn't get to send this signal. It sets the
+                # sender argument to self.__class__, in case the BaseHandler
+                # is subclassed.
+                got_request_exception.send(sender=BaseHandler, request=request)
+                return http.HttpResponseServerError(blob, content_type=JSON)
+        return _wrapped
+    if len(decoargs) == 1 and callable(decoargs[0]):
+        return deco(decoargs[0])
+    else:
+        return deco
