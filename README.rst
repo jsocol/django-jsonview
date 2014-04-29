@@ -37,6 +37,22 @@ Just import the decorator, use, and return a JSON-serializable object::
         }
 
 
+Content Types
+-------------
+
+If you need to return a content type other than the standard
+``application/json``, you can specify that in the decorator with the
+``content_type`` argument, for example::
+
+    from jsonview.decorators import json_view
+
+    @json_view(content_type='application/vnd.github+json')
+    def myview(request):
+        return {'foo': 'bar'}
+
+The response will have the appropriate content type header.
+
+
 Return Values
 -------------
 
