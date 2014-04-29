@@ -141,6 +141,31 @@ values: an object, a status code, and a dictionary of headers.
 Custom header values may be overwritten by response middleware.
 
 
+Raw Return Values
+-----------------
+
+To make it possible to cache JSON responses as strings (and because they
+aren't JSON serializable anyway) if you return an ``HttpResponse``
+object (or subclass) it will be passed through unchanged, e.g.::
+
+    from django import http
+    from jsonview.decorators import JSON
+
+    @json_view
+    def caching_view(request):
+        kached = cache.get('cache-key')
+        if kached:
+            return http.HttpResponse(kached, content_type=JSON)
+        # Assuming something else populates this cache.
+        return {'complicated': 'object'}
+
+.. note::
+
+   ``@require_POST`` and the other HTTP method decorators  work by
+   *returning* a response, rather than *raising*, an an exception, so
+   ``HttpResponseNotAllowed`` is handled specially.
+
+
 Alternative JSON Implementations
 ================================
 

@@ -72,6 +72,11 @@ def json_view(*decoargs, **decokwargs):
                     })
                     return http.HttpResponse(
                         blob, status=405, content_type=JSON)
+
+                # Allow HttpResponses to go straight through.
+                if isinstance(ret, http.HttpResponse):
+                    return ret
+
                 blob = json.dumps(ret)
                 response = http.HttpResponse(blob, status=status,
                                              content_type=content_type)

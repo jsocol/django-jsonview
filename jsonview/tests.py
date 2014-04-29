@@ -166,3 +166,15 @@ class JsonViewTests(TestCase):
         eq_(200, res.status_code)
         eq_(data, json.loads(res.content.decode("utf-8")))
         eq_(testtype, res['content-type'])
+
+    def test_passthrough_response(self):
+        """Allow HttpResponse objects through untouched."""
+        payload = json.dumps({'foo': 'bar'})
+        @json_view
+        def temp(req):
+            return http.HttpResponse(payload, content_type='text/plain')
+
+        res = temp(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(payload, res.content)
+        eq_('text/plain', res['content-type'])
