@@ -207,3 +207,6 @@ Then run the tests with::
 .. _Pull requests: https://github.com/jsocol/django-jsonview/pulls
 .. _issues: https://github.com/jsocol/django-jsonview/issues
 .. _virtualenv: http://www.virtualenv.org/
+.. _ujson: https://pypi.python.org/pypi/ujson
+.. _cjson: https://pypi.python.org/pypi/python-cjson
+.. _yajl: https://pypi.python.org/pypi/yajl
