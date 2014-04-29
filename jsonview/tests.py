@@ -169,7 +169,7 @@ class JsonViewTests(TestCase):
 
     def test_passthrough_response(self):
         """Allow HttpResponse objects through untouched."""
-        payload = json.dumps({'foo': 'bar'})
+        payload = json.dumps({'foo': 'bar'}).encode('utf-8')
         @json_view
         def temp(req):
             return http.HttpResponse(payload, content_type='text/plain')
