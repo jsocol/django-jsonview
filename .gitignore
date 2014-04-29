@@ -1,4 +1,5 @@
-.py[co]
+*.py[co]
+*.swp
 *.egg-info
 build
 dist
