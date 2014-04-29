@@ -4,6 +4,7 @@ import json
 from django import http
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
+from django.test.utils import override_settings
 from django.views.decorators.http import require_POST
 
 import mock
@@ -98,7 +99,8 @@ class JsonViewTests(TestCase):
         data = json.loads(res.content.decode("utf-8"))
         eq_(405, data['error'])
 
-    def test_server_error(self):
+    @override_settings(DEBUG=True)
+    def test_server_error_debug(self):
         @json_view
         def temp(req):
             raise TypeError('fail')
@@ -109,6 +111,19 @@ class JsonViewTests(TestCase):
         data = json.loads(res.content.decode("utf-8"))
         eq_(500, data['error'])
         eq_('fail', data['message'])
+
+    @override_settings(DEBUG=False)
+    def test_server_error_no_debug(self):
+        @json_view
+        def temp(req):
+            raise TypeError('fail')
+
+        res = temp(rf.get('/'))
+        eq_(500, res.status_code)
+        eq_(JSON, res['content-type'])
+        data = json.loads(res.content.decode('utf-8'))
+        eq_(500, data['error'])
+        eq_('An error occurred', data['message'])
 
     def test_http_status(self):
         @json_view

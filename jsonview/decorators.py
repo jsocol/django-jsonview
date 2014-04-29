@@ -113,9 +113,13 @@ def json_view(*decoargs, **decokwargs):
                 })
                 return http.HttpResponseBadRequest(blob, content_type=JSON)
             except Exception as e:
+                if settings.DEBUG:
+                    exc_text = unicode(e)
+                else:
+                    exc_text = 'An error occurred'
                 blob = json.dumps({
                     'error': 500,
-                    'message': unicode(e),
+                    'message': exc_text,
                 })
                 logger.exception(unicode(e))
 
