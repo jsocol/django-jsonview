@@ -77,6 +77,13 @@ response body that looks like::
         'message': str(exception),
     })
 
+.. note::
+
+   As of v0.4, application exceptions do **not** behave this way if
+   ``DEBUG = False``. When ``DEBUG = False``, the ``message`` value is
+   always ``An error occurred``. When ``DEBUG = True``, the exception
+   message is sent back.
+
 
 ``BadRequest``
 --------------
@@ -177,7 +184,7 @@ go for it. Just add this to your Django settings::
     JSON_MODULE = 'ujson'
 
 Anything, as long as it's a module that has ``.loads()`` and ``.dumps()``
-methods, it.
+methods.
 
 
 Contributing
