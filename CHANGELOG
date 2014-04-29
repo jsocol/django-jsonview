@@ -1,10 +1,20 @@
 Changelog
 =========
 
+v0.4.0
+------
+
+- Supports new Djangos: 1.4.x, 1.5.x, 1.6.x, and 1.7bx.
+- Accepts a content_type kwarg to change from default application/json.
+- Pass HttpResponse objects through verbatim. (Previously choked.)
+- Only send exception text when settings.DEBUG is True.
+
+
 v0.3.0
 ------
 
 - Python3 support
+
 
 v0.2.2
 ------
