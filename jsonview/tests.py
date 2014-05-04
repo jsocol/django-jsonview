@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 import json
+import sys
 
 from django import http
 from django.core.exceptions import PermissionDenied
+from django.core.serializers.json import DjangoJSONEncoder
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 import mock
@@ -20,6 +23,15 @@ rf = RequestFactory()
 def eq_(a, b, msg=None):
     """From nose.tools.eq_."""
     assert a == b, msg or '%r != %r' % (a, b)
+
+if sys.version < '3':
+    def b(x):
+        return x
+else:
+    import codecs
+
+    def b(x):
+        return codecs.latin_1_encode(x)[0]
 
 
 class JsonViewTests(TestCase):
@@ -194,3 +206,15 @@ class JsonViewTests(TestCase):
         eq_(200, res.status_code)
         eq_(payload, res.content)
         eq_('text/plain', res['content-type'])
+
+    def test_datetime(self):
+        now = timezone.now()
+
+        @json_view
+        def temp(req):
+            return {"datetime": now}
+
+        res = temp(rf.get('/'))
+        eq_(200, res.status_code)
+        payload = json.dumps({"datetime": now}, cls=DjangoJSONEncoder)
+        eq_(b(payload), res.content)

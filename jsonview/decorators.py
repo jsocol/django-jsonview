@@ -5,6 +5,7 @@ from django import http
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import got_request_exception
 from django.utils.importlib import import_module
 
@@ -77,7 +78,7 @@ def json_view(*decoargs, **decokwargs):
                 if isinstance(ret, http.HttpResponse):
                     return ret
 
-                blob = json.dumps(ret)
+                blob = json.dumps(ret, cls=DjangoJSONEncoder)
                 response = http.HttpResponse(blob, status=status,
                                              content_type=content_type)
                 for k in headers:
