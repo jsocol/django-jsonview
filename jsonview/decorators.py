@@ -27,7 +27,7 @@ def _dump_json(data):
     return json.dumps(data)
 
 
-def json_view(*decoargs, **decokwargs):
+def json_view(*args, **kwargs):
     """Ensure the response content is well-formed JSON.
 
     Views wrapped in @json_view can return JSON-serializable Python objects,
@@ -55,9 +55,9 @@ def json_view(*decoargs, **decokwargs):
 
     """
 
-    content_type = decokwargs.get("content_type", JSON)
+    content_type = kwargs.get("content_type", JSON)
 
-    def deco(f):
+    def decorator(f):
         @wraps(f)
         def _wrapped(request, *a, **kw):
             try:
@@ -137,7 +137,7 @@ def json_view(*decoargs, **decokwargs):
                 got_request_exception.send(sender=BaseHandler, request=request)
                 return http.HttpResponseServerError(blob, content_type=JSON)
         return _wrapped
-    if len(decoargs) == 1 and callable(decoargs[0]):
-        return deco(decoargs[0])
+    if len(args) == 1 and callable(args[0]):
+        return decorator(args[0])
     else:
-        return deco
+        return decorator
