@@ -218,3 +218,16 @@ class JsonViewTests(TestCase):
         eq_(200, res.status_code)
         payload = json.dumps({"datetime": now}, cls=DjangoJSONEncoder)
         eq_(b(payload), res.content)
+
+    @override_settings(JSON_USE_DJANGO_SERIALIZER=False)
+    def test_datetime_no_serializer(self):
+        now = timezone.now()
+
+        @json_view
+        def temp(req):
+            return {'datetime': now}
+
+        res = temp(rf.get('/'))
+        eq_(500, res.status_code)
+        payload = json.loads(res.content.decode('utf-8'))
+        eq_(500, payload['error'])

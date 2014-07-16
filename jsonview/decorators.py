@@ -21,6 +21,12 @@ logger = logging.getLogger('django.request')
 logger.info('Using %s JSON module.', json.__name__)
 
 
+def _dump_json(data):
+    if getattr(settings, 'JSON_USE_DJANGO_SERIALIZER', True):
+        return json.dumps(data, cls=DjangoJSONEncoder)
+    return json.dumps(data)
+
+
 def json_view(*decoargs, **decokwargs):
     """Ensure the response content is well-formed JSON.
 
@@ -67,7 +73,7 @@ def json_view(*decoargs, **decokwargs):
 
                 # Some errors are not exceptions. :\
                 if isinstance(ret, http.HttpResponseNotAllowed):
-                    blob = json.dumps({
+                    blob = _dump_json({
                         'error': 405,
                         'message': 'HTTP method not allowed.'
                     })
@@ -78,14 +84,14 @@ def json_view(*decoargs, **decokwargs):
                 if isinstance(ret, http.HttpResponse):
                     return ret
 
-                blob = json.dumps(ret, cls=DjangoJSONEncoder)
+                blob = _dump_json(ret)
                 response = http.HttpResponse(blob, status=status,
                                              content_type=content_type)
                 for k in headers:
                     response[k] = headers[k]
                 return response
             except http.Http404 as e:
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 404,
                     'message': unicode(e),
                 })
@@ -102,13 +108,13 @@ def json_view(*decoargs, **decokwargs):
                         'status_code': 403,
                         'request': request,
                     })
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 403,
                     'message': unicode(e),
                 })
                 return http.HttpResponseForbidden(blob, content_type=JSON)
             except BadRequest as e:
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 400,
                     'message': unicode(e),
                 })
@@ -118,7 +124,7 @@ def json_view(*decoargs, **decokwargs):
                     exc_text = unicode(e)
                 else:
                     exc_text = 'An error occurred'
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 500,
                     'message': exc_text,
                 })
