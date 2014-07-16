@@ -48,7 +48,7 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(data, json.loads(res.content.decode("utf-8")))
+        eq_(data, json.loads(res.content.decode('utf-8')))
         eq_(JSON, res['content-type'])
 
     def test_list(self):
@@ -60,7 +60,7 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(data, json.loads(res.content.decode("utf-8")))
+        eq_(data, json.loads(res.content.decode('utf-8')))
         eq_(JSON, res['content-type'])
 
     def test_404(self):
@@ -71,7 +71,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(404, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_(404, data['error'])
         eq_('foo', data['message'])
 
@@ -83,7 +83,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(403, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_(403, data['error'])
         eq_('bar', data['message'])
 
@@ -95,7 +95,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(400, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_(400, data['error'])
         eq_('baz', data['message'])
 
@@ -108,7 +108,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(405, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_(405, data['error'])
 
         res = temp(rf.post('/'))
@@ -123,7 +123,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(500, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_(500, data['error'])
         eq_('fail', data['message'])
 
@@ -147,7 +147,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(402, res.status_code)
         eq_(JSON, res['content-type'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_({}, data)
 
     def test_headers(self):
@@ -158,7 +158,7 @@ class JsonViewTests(TestCase):
         eq_(302, res.status_code)
         eq_(JSON, res['content-type'])
         eq_('Bar', res['X-Foo'])
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         eq_({}, data)
 
     def test_signal_sent(self):
@@ -181,12 +181,12 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/\xe7\xe9'))
         eq_(404, res.status_code)
-        data = json.loads(res.content.decode("utf-8"))
+        data = json.loads(res.content.decode('utf-8'))
         assert '\xe7\xe9' in data['message']
 
     def test_override_content_type(self):
-        testtype = "application/vnd.helloworld+json"
-        data = {"foo": "bar"}
+        testtype = 'application/vnd.helloworld+json'
+        data = {'foo': 'bar'}
 
         @json_view(content_type=testtype)
         def temp(req):
@@ -194,7 +194,7 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        eq_(data, json.loads(res.content.decode("utf-8")))
+        eq_(data, json.loads(res.content.decode('utf-8')))
         eq_(testtype, res['content-type'])
 
     def test_passthrough_response(self):
@@ -215,11 +215,11 @@ class JsonViewTests(TestCase):
 
         @json_view
         def temp(req):
-            return {"datetime": now}
+            return {'datetime': now}
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
-        payload = json.dumps({"datetime": now}, cls=DjangoJSONEncoder)
+        payload = json.dumps({'datetime': now}, cls=DjangoJSONEncoder)
         eq_(b(payload), res.content)
 
     @override_settings(JSON_USE_DJANGO_SERIALIZER=False)

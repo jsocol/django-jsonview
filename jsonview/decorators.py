@@ -49,13 +49,13 @@ def json_view(*args, **kwargs):
     You can override it for non-error responses by giving the content_type
     keyword parameter to the decorator, e.g.:
 
-    >>> @json_view(content_type="application/vnd.example-v1.0+json")
+    >>> @json_view(content_type='application/vnd.example-v1.0+json')
     ... def example2(request):
     ...     return {'foo': 'bar'}
 
     """
 
-    content_type = kwargs.get("content_type", JSON)
+    content_type = kwargs.get('content_type', JSON)
 
     def decorator(f):
         @wraps(f)
