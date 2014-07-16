@@ -111,6 +111,9 @@ class JsonViewTests(TestCase):
         data = json.loads(res.content.decode("utf-8"))
         eq_(405, data['error'])
 
+        res = temp(rf.post('/'))
+        eq_(200, res.status_code)
+
     @override_settings(DEBUG=True)
     def test_server_error_debug(self):
         @json_view

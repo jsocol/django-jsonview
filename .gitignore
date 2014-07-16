@@ -1,5 +1,6 @@
 *.py[co]
 *.swp
+.coverage
 *.egg-info
 build
 dist
