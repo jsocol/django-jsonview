@@ -1,15 +1,23 @@
 Changelog
 =========
 
+v0.4.3
+------
+
+- Add setting to make Django's serializer optional when using 3rd party
+  JSON modules.
+
 v0.4.2
 ------
 
 - Add support for datetime handling.
 
+
 v0.4.1
 ------
 
 - Fix trove classifiers for Python 3.
+
 
 v0.4.0
 ------
