@@ -21,7 +21,13 @@ logger = logging.getLogger('django.request')
 logger.info('Using %s JSON module.', json.__name__)
 
 
-def json_view(*decoargs, **decokwargs):
+def _dump_json(data):
+    if getattr(settings, 'JSON_USE_DJANGO_SERIALIZER', True):
+        return json.dumps(data, cls=DjangoJSONEncoder)
+    return json.dumps(data)
+
+
+def json_view(*args, **kwargs):
     """Ensure the response content is well-formed JSON.
 
     Views wrapped in @json_view can return JSON-serializable Python objects,
@@ -43,15 +49,15 @@ def json_view(*decoargs, **decokwargs):
     You can override it for non-error responses by giving the content_type
     keyword parameter to the decorator, e.g.:
 
-    >>> @json_view(content_type="application/vnd.example-v1.0+json")
+    >>> @json_view(content_type='application/vnd.example-v1.0+json')
     ... def example2(request):
     ...     return {'foo': 'bar'}
 
     """
 
-    content_type = decokwargs.get("content_type", JSON)
+    content_type = kwargs.get('content_type', JSON)
 
-    def deco(f):
+    def decorator(f):
         @wraps(f)
         def _wrapped(request, *a, **kw):
             try:
@@ -67,7 +73,7 @@ def json_view(*decoargs, **decokwargs):
 
                 # Some errors are not exceptions. :\
                 if isinstance(ret, http.HttpResponseNotAllowed):
-                    blob = json.dumps({
+                    blob = _dump_json({
                         'error': 405,
                         'message': 'HTTP method not allowed.'
                     })
@@ -78,14 +84,14 @@ def json_view(*decoargs, **decokwargs):
                 if isinstance(ret, http.HttpResponse):
                     return ret
 
-                blob = json.dumps(ret, cls=DjangoJSONEncoder)
+                blob = _dump_json(ret)
                 response = http.HttpResponse(blob, status=status,
                                              content_type=content_type)
                 for k in headers:
                     response[k] = headers[k]
                 return response
             except http.Http404 as e:
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 404,
                     'message': unicode(e),
                 })
@@ -102,13 +108,13 @@ def json_view(*decoargs, **decokwargs):
                         'status_code': 403,
                         'request': request,
                     })
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 403,
                     'message': unicode(e),
                 })
                 return http.HttpResponseForbidden(blob, content_type=JSON)
             except BadRequest as e:
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 400,
                     'message': unicode(e),
                 })
@@ -118,7 +124,7 @@ def json_view(*decoargs, **decokwargs):
                     exc_text = unicode(e)
                 else:
                     exc_text = 'An error occurred'
-                blob = json.dumps({
+                blob = _dump_json({
                     'error': 500,
                     'message': exc_text,
                 })
@@ -131,7 +137,7 @@ def json_view(*decoargs, **decokwargs):
                 got_request_exception.send(sender=BaseHandler, request=request)
                 return http.HttpResponseServerError(blob, content_type=JSON)
         return _wrapped
-    if len(decoargs) == 1 and callable(decoargs[0]):
-        return deco(decoargs[0])
+    if len(args) == 1 and callable(args[0]):
+        return decorator(args[0])
     else:
-        return deco
+        return decorator

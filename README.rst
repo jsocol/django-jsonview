@@ -186,6 +186,17 @@ go for it. Just add this to your Django settings::
 Anything, as long as it's a module that has ``.loads()`` and ``.dumps()``
 methods.
 
+By default, ``@json_view`` uses Django's ``DjangoJSONSerializer`` class.
+If the JSON module you're using does not support the ``cls`` kwarg, use
+the following setting to not set a serializer::
+
+    JSON_USE_DJANGO_SERIALIZER = False
+
+.. note::
+
+   Without the Django serializer, ``datetime.datetime`` objects will not
+   be automatically serializable.
+
 
 Contributing
 ============
