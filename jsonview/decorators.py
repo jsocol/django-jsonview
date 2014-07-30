@@ -128,7 +128,15 @@ def json_view(*args, **kwargs):
                     'error': 500,
                     'message': exc_text,
                 })
-                logger.exception(unicode(e))
+                
+                # Generate the usual 500 error email with stack trace and full
+                # debugging information
+                logger.exception('Internal Server Error: %s', request.path,
+                    extra={
+                        'status_code': 500,
+                        'request': request
+                    }
+                )
 
                 # Here we lie a little bit. Because we swallow the exception,
                 # the BaseHandler doesn't get to send this signal. It sets the
