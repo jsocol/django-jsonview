@@ -131,8 +131,7 @@ def json_view(*args, **kwargs):
                 
                 # Generate the usual 500 error email with stack trace and full
                 # debugging information
-                logger.error('Internal Server Error: %s', request.path,
-                    exc_info=e,
+                logger.exception('Internal Server Error: %s', request.path,
                     extra={
                         'status_code': 500,
                         'request': request
