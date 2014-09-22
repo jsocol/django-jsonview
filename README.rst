@@ -6,8 +6,12 @@ django-jsonview
 .. image:: https://travis-ci.org/jsocol/django-jsonview.png?branch=master
    :target: https://travis-ci.org/jsocol/django-jsonview
 
-**django-jsonview** is a simple decorator that translates Python objects
-to JSON and makes sure your view will always return JSON.
+**django-jsonview** is a simple decorator that helps your views work
+with JSON data by:
+
+- automatically turning (serializable) return values into JSON,
+- ensuring a JSON return value/type even on exception, and
+- validating and parsing JSON request content.
 
 I've copied and pasted this so often I decided I just wanted to put it
 in a package.
@@ -36,6 +40,21 @@ Just import the decorator, use, and return a JSON-serializable object::
             'foo': 'bar',
         }
 
+You can get a JSON-parsed request body, if there is one, via
+``request.json``::
+
+    @json_view
+    @require_POST
+    def my_endpoint(request):
+        logger.debug(request.json['foo'])
+        return {}
+
+    # And
+    req = RequestFactory().post('/', '{"foo": "bar"}',
+                                content_type='application/json')
+    my_endpoint(req)
+    # 'bar'
+
 
 Content Types
 -------------
@@ -51,6 +70,22 @@ If you need to return a content type other than the standard
         return {'foo': 'bar'}
 
 The response will have the appropriate content type header.
+
+
+Validating Requests
+-------------------
+
+If you do not wish to validate request bodies (e.g. you accept
+``multipart/form-data`` data, or no body, etc) simply pass
+``validate_request=False`` to the decorator, e.g.::
+
+    from jsonview.decorators import json_view
+
+    @json_view(validate_request=False)
+    @require_POST
+    def my_form_endpoint(request):
+        # Use request.POST as usual.
+        return {}
 
 
 Return Values

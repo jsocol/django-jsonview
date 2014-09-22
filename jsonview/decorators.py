@@ -7,6 +7,10 @@ from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import got_request_exception
+try:
+    from django.utils.encoding import smart_unicode as smart_text
+except ImportError:
+    from django.utils.encoding import smart_text
 from django.utils.importlib import import_module
 
 import sys
@@ -28,7 +32,7 @@ def _dump_json(data):
 
 
 def json_view(*args, **kwargs):
-    """Ensure the response content is well-formed JSON.
+    """Ensure the request and response content is well-formed JSON.
 
     Views wrapped in @json_view can return JSON-serializable Python objects,
     like lists and dicts, and the decorator will serialize the output and set
@@ -53,9 +57,19 @@ def json_view(*args, **kwargs):
     ... def example2(request):
     ...     return {'foo': 'bar'}
 
+    Also validates the request body is valid JSON and places the parsed JSON in
+    `request.json`, e.g.:
+
+    >>> @json_view
+    ... @require_POST
+    ... def example3(request):
+    ...     logging.debug(request.json)
+    ...     return {}
+
     """
 
     content_type = kwargs.get('content_type', JSON)
+    validate_request = kwargs.get('validate_request', True)
 
     def decorator(f):
         @wraps(f)
@@ -63,6 +77,15 @@ def json_view(*args, **kwargs):
             try:
                 status = 200
                 headers = {}
+
+                request.json = None
+                if request.body:
+                    try:
+                        request.json = json.loads(smart_text(request.body))
+                    except ValueError:
+                        if validate_request:
+                            raise BadRequest
+
                 ret = f(request, *a, **kw)
 
                 if isinstance(ret, tuple):

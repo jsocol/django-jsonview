@@ -8,6 +8,10 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
+try:
+    from django.utils.encoding import smart_unicode as smart_text
+except ImportError:
+    from django.utils.encoding import smart_text
 from django.views.decorators.http import require_POST
 
 import mock
@@ -32,6 +36,9 @@ else:
 
     def b(x):
         return codecs.latin_1_encode(x)[0]
+
+
+json_loads = lambda s: json.loads(smart_text(s))
 
 
 class JsonViewTests(TestCase):
@@ -100,7 +107,7 @@ class JsonViewTests(TestCase):
         eq_('baz', data['message'])
 
     def test_not_allowed(self):
-        @json_view
+        @json_view(validate_request=False)
         @require_POST
         def temp(req):
             return {}
@@ -232,5 +239,36 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(500, res.status_code)
-        payload = json.loads(res.content.decode('utf-8'))
+        payload = json_loads(res.content)
         eq_(500, payload['error'])
+
+    def test_validate_request_invalid_json(self):
+        @json_view
+        def temp(req):
+            return req.json
+
+        res = temp(rf.post('/'))
+        eq_(400, res.status_code)
+
+        res = temp(rf.post('/', {'foo': 'bar'}))
+        eq_(400, res.status_code)
+
+    def test_no_validate_request_invalid_json(self):
+        @json_view(validate_request=False)
+        def temp(req):
+            return req.json
+
+        res = temp(rf.post('/'))
+        assert json_loads(res.content) is None
+
+        res = temp(rf.post('/', {'foo': 'bar'}))
+        assert json_loads(res.content) is None
+
+    def test_validate_request_valid_json(self):
+        @json_view
+        def temp(req):
+            return req.json
+
+        res = temp(rf.post('/', '{"foo": "bar"}',
+                           content_type='application/json'))
+        eq_({'foo': 'bar'}, json_loads(res.content))
