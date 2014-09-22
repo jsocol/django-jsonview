@@ -75,6 +75,8 @@ The response will have the appropriate content type header.
 Validating Requests
 -------------------
 
+*New in v0.5.*
+
 If you do not wish to validate request bodies (e.g. you accept
 ``multipart/form-data`` data, or no body, etc) simply pass
 ``validate_request=False`` to the decorator, e.g.::
