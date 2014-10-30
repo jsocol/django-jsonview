@@ -1,4 +1,5 @@
 import logging
+import traceback
 from functools import wraps
 
 from django import http
@@ -124,14 +125,15 @@ def json_view(*args, **kwargs):
                 })
                 return http.HttpResponseBadRequest(blob, content_type=JSON)
             except Exception as e:
-                if settings.DEBUG:
-                    exc_text = unicode(e)
-                else:
-                    exc_text = 'An error occurred'
-                blob = _dump_json({
+                exc_data = {
                     'error': 500,
-                    'message': exc_text,
-                })
+                    'message': 'An error occurred',
+                }
+                if settings.DEBUG:
+                    exc_data['message'] = unicode(e)
+                    exc_data['traceback'] = traceback.format_exc()
+                
+                blob = _dump_json(exc_data)
 
                 # Generate the usual 500 error email with stack trace and full
                 # debugging information
