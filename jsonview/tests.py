@@ -144,6 +144,14 @@ class JsonViewTests(TestCase):
         eq_(500, data['error'])
         eq_('An error occurred', data['message'])
 
+    @override_settings(DEBUG_PROPAGATE_EXCEPTIONS=True)
+    def test_server_error_propagate_exception(self):
+        @json_view
+        def temp(req):
+            raise TypeError('fail')
+
+        self.assertRaises(TypeError, temp, rf.get('/'))
+
     def test_http_status(self):
         @json_view
         def temp(req):

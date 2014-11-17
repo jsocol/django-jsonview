@@ -124,6 +124,8 @@ def json_view(*args, **kwargs):
                 })
                 return http.HttpResponseBadRequest(blob, content_type=JSON)
             except Exception as e:
+                if settings.DEBUG_PROPAGATE_EXCEPTIONS:
+                    raise
                 if settings.DEBUG:
                     exc_text = unicode(e)
                 else:
