@@ -12,7 +12,10 @@ try:
     from django.utils.encoding import smart_unicode as smart_text
 except ImportError:
     from django.utils.encoding import smart_text
-from django.utils.importlib import import_module
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module
 
 import sys
 if sys.version_info[0] == 3:
