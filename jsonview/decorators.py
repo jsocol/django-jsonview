@@ -35,7 +35,7 @@ def _dump_json(data):
     if getattr(settings, 'JSON_USE_DJANGO_SERIALIZER', True):
         options['cls'] = DjangoJSONEncoder
     else:
-        if 'cls' in options and isinstance(options['cls'], basestring):
+        if 'cls' in options and type(options['cls']) in (str, unicode):
             try:
                 from django.utils.module_loading import import_string
             except ImportError:
