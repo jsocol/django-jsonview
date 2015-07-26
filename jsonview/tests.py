@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import json
 import sys
 
-from django import http
+from django import VERSION as django_version, http
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.test import RequestFactory, TestCase
@@ -260,6 +260,13 @@ class JsonViewTests(TestCase):
         def temp(req):
             return {'foo': O()}
 
-        res = temp(rf.get('/'))
-        eq_(200, res.status_code)
-        eq_(payload, res.content)
+        if django_version[0] < 1 or django_version[1] < 7:
+            try:
+                res = temp(rf.get('/'))
+            except NotImplementedError:
+                res = None
+            eq_(res, None)
+        else:
+            res = temp(rf.get('/'))
+            eq_(200, res.status_code)
+            eq_(payload, res.content)
