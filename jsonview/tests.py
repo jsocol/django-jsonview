@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import json
 import sys
 
-from django import http
+from django import VERSION as django_version, http
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.test import RequestFactory, TestCase
@@ -36,6 +36,14 @@ else:
 
     def b(x):
         return codecs.latin_1_encode(x)[0]
+
+
+class CustomTestEncoder(DjangoJSONEncoder):
+    def default(self, o):
+        try:
+            return o.for_json()
+        except AttributeError:
+            return super(CustomTestEncoder, self).default(o)
 
 
 class JsonViewTests(TestCase):
@@ -239,3 +247,26 @@ class JsonViewTests(TestCase):
         eq_(500, res.status_code)
         payload = json.loads(res.content.decode('utf-8'))
         eq_(500, payload['error'])
+
+    @override_settings(JSON_USE_DJANGO_SERIALIZER=False, JSON_OPTIONS={'cls': 'jsonview.tests.CustomTestEncoder'})
+    def test_json_options(self):
+        """Use JSON_OPTIONS setting to provide additional options to json.dumps()"""
+        payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
+        class O(object):
+            def for_json(self):
+                return 'Custom JSON'
+
+        @json_view
+        def temp(req):
+            return {'foo': O()}
+
+        if django_version[0] < 1 or django_version[1] < 7:
+            try:
+                res = temp(rf.get('/'))
+            except NotImplementedError:
+                res = None
+            eq_(res, None)
+        else:
+            res = temp(rf.get('/'))
+            eq_(200, res.status_code)
+            eq_(payload, res.content)

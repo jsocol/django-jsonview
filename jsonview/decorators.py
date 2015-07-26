@@ -30,9 +30,23 @@ logger.info('Using %s JSON module.', json.__name__)
 
 
 def _dump_json(data):
+    options = getattr(settings, 'JSON_OPTIONS', {})
+
     if getattr(settings, 'JSON_USE_DJANGO_SERIALIZER', True):
-        return json.dumps(data, cls=DjangoJSONEncoder)
-    return json.dumps(data)
+        options['cls'] = DjangoJSONEncoder
+    else:
+        if 'cls' in options and type(options['cls']) in (str, unicode):
+            try:
+                from django.utils.module_loading import import_string
+            except ImportError:
+                raise NotImplementedError(
+                    'Passing custom JSON serializers as strings '
+                    'requires Django 1.7 or greater'
+                )
+            else:
+                options['cls'] = import_string(options['cls'])
+
+    return json.dumps(data, **options)
 
 
 def json_view(*args, **kwargs):
