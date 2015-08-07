@@ -9,10 +9,6 @@ from django.core.handlers.base import BaseHandler
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import got_request_exception
 try:
-    from django.utils.encoding import smart_unicode as smart_text
-except ImportError:
-    from django.utils.encoding import smart_text
-try:
     from importlib import import_module
 except ImportError:
     from django.utils.importlib import import_module
@@ -154,7 +150,8 @@ def json_view(*args, **kwargs):
 
                 # Generate the usual 500 error email with stack trace and full
                 # debugging information
-                logger.error('Internal Server Error: %s', request.path,
+                logger.error(
+                    'Internal Server Error: %s', request.path,
                     exc_info=True,
                     extra={
                         'status_code': 500,

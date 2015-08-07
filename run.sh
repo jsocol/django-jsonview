@@ -11,6 +11,7 @@ usage() {
     echo "USAGE: $PROG [command]"
     echo "  test - run the jsonview tests"
     echo "  shell - open the Django shell"
+    echo "  check - run flake8"
     exit 1
 }
 
@@ -19,6 +20,8 @@ case "$CMD" in
         django-admin.py test jsonview $@ ;;
     "shell" )
         django-admin.py shell $@ ;;
+    "check" )
+        flake8 jsonview $@ ;;
     * )
         usage ;;
 esac
