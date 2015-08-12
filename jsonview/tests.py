@@ -8,10 +8,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
-try:
-    from django.utils.encoding import smart_unicode as smart_text
-except ImportError:
-    from django.utils.encoding import smart_text
 from django.views.decorators.http import require_POST
 
 import mock
@@ -36,6 +32,14 @@ else:
 
     def b(x):
         return codecs.latin_1_encode(x)[0]
+
+
+class CustomTestEncoder(DjangoJSONEncoder):
+    def default(self, o):
+        try:
+            return o.for_json()
+        except AttributeError:
+            return super(CustomTestEncoder, self).default(o)
 
 
 class JsonViewTests(TestCase):
@@ -239,3 +243,20 @@ class JsonViewTests(TestCase):
         eq_(500, res.status_code)
         payload = json.loads(res.content.decode('utf-8'))
         eq_(500, payload['error'])
+
+    @override_settings(
+        JSON_OPTIONS={'cls': 'jsonview.tests.CustomTestEncoder'})
+    def test_json_options(self):
+        payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
+
+        class O(object):
+            def for_json(self):
+                return 'Custom JSON'
+
+        @json_view
+        def temp(req):
+            return {'foo': O()}
+
+        res = temp(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(payload, res.content)

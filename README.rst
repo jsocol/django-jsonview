@@ -186,9 +186,40 @@ go for it. Just add this to your Django settings::
 Anything, as long as it's a module that has ``.loads()`` and ``.dumps()``
 methods.
 
-By default, ``@json_view`` uses Django's ``DjangoJSONSerializer`` class.
-If the JSON module you're using does not support the ``cls`` kwarg, use
-the following setting to not set a serializer::
+
+Configuring JSON Output
+-----------------------
+
+.. versionadded:: 0.5
+
+Additional keyword arguments can be passed to ``json.dumps()`` via the
+``JSON_OPTIONS = {}`` Django setting. For example, to pretty-print JSON
+output::
+
+    JSON_OPTIONS = {
+        'indent': 4,
+    }
+
+Or to compactify it::
+
+    JSON_OPTIONS = {
+        'separators': (',', ':'),
+    }
+
+To use Django's ``DjangoJSONEncoder``, add a ``cls``::
+
+    JSON_OPTIONS = {
+        'cls': 'django.core.serializers.json.DjangoJSONEncoder',
+    }
+
+``JSON_OPTIONS['cls']`` may be a dotted string or a ``JSONEncoder``
+class.
+
+.. versionchanged:: 0.6
+
+Through version 0.5, ``@json_view`` uses Django's ``DjangoJSONEncoder``
+class by default. If the JSON module you're using does not support the
+``cls`` kwarg, use the following setting to not set a serializer::
 
     JSON_USE_DJANGO_SERIALIZER = False
 
@@ -196,6 +227,24 @@ the following setting to not set a serializer::
 
    Without the Django serializer, ``datetime.datetime`` objects will not
    be automatically serializable.
+
+.. warning::
+
+   This behavior will change in 0.6.
+
+
+Atomic Requests
+===============
+
+Because ``@json_view`` catches exceptions, the normal Django setting
+``ATOMIC_REQUESTS`` does not correctly cause a rollback. This can be
+worked around by explicitly setting ``@transaction.atomic`` *below* the
+``@json_view`` decorator, e.g.::
+
+    @json_view
+    @transaction.atomic
+    def my_func(request):
+        # ...
 
 
 Contributing
