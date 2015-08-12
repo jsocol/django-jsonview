@@ -233,6 +233,20 @@ class by default. If the JSON module you're using does not support the
    This behavior will change in 0.6.
 
 
+Atomic Requests
+===============
+
+Because ``@json_view`` catches exceptions, the normal Django setting
+``ATOMIC_REQUESTS`` does not correctly cause a rollback. This can be
+worked around by explicitly setting ``@transaction.atomic`` *below* the
+``@json_view`` decorator, e.g.::
+
+    @json_view
+    @transaction.atomic
+    def my_func(request):
+        # ...
+
+
 Contributing
 ============
 
