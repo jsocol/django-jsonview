@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import traceback
-import warnings
 from functools import wraps
 from importlib import import_module
 
