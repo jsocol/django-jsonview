@@ -296,4 +296,4 @@ Then run the tests with::
 .. _ujson: https://pypi.python.org/pypi/ujson
 .. _cjson: https://pypi.python.org/pypi/python-cjson
 .. _yajl: https://pypi.python.org/pypi/yajl
-.. _Class-based views: https://docs.djangoproject.com/en/1.9/topics/class-based-views/intro/
+.. _Class-based views: https://docs.djangoproject.com/en/1.9/topics/class-based-views/intro/#decorating-class-based-views
