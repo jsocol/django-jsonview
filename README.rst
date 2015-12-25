@@ -225,10 +225,11 @@ Or to compactify it::
         'separators': (',', ':'),
     }
 
-To use Django's ``DjangoJSONEncoder``, add a ``cls``::
+jsonview uses ``DjangoJSONEncoder`` by default. To use a different JSON
+encoder, use the ``cls`` option::
 
     JSON_OPTIONS = {
-        'cls': 'django.core.serializers.json.DjangoJSONEncoder',
+        'cls': 'path.to.MyJSONEncoder',
     }
 
 ``JSON_OPTIONS['cls']`` may be a dotted string or a ``JSONEncoder``
@@ -236,20 +237,12 @@ class.
 
 .. versionchanged:: 0.6
 
-Through version 0.5, ``@json_view`` uses Django's ``DjangoJSONEncoder``
-class by default. If the JSON module you're using does not support the
-``cls`` kwarg, use the following setting to not set a serializer::
+**If you are using a JSON module that does not support the ``cls``
+kwarg**, such as ujson, set the ``cls`` option to ``None``::
 
-    JSON_USE_DJANGO_SERIALIZER = False
-
-.. note::
-
-   Without the Django serializer, ``datetime.datetime`` objects will not
-   be automatically serializable.
-
-.. warning::
-
-   This behavior will change in 0.6.
+    JSON_OPTIONS = {
+        'cls': None,
+    }
 
 
 Atomic Requests

@@ -25,22 +25,12 @@ logger = logging.getLogger('django.request')
 def _dump_json(data):
     options = getattr(settings, 'JSON_OPTIONS', {})
 
-    if 'cls' in options:
-        if isinstance(options['cls'], six.string_types):
-            options['cls'] = import_string(options['cls'])
-    else:
-        try:
-            use_django = getattr(settings, 'JSON_USE_DJANGO_SERIALIZER')
-        except AttributeError:
-            use_django = True
-        else:
-            warnings.warn(
-                "JSON_USE_DJANGO_SERIALIZER is deprecated and will be "
-                "removed. Please use JSON_OPTIONS['cls'] instead.",
-                DeprecationWarning)
-
-        if use_django:
-            options['cls'] = DjangoJSONEncoder
+    # Use the DjangoJSONEncoder by default, unless cls is set to None.
+    options.setdefault('cls', DjangoJSONEncoder)
+    if isinstance(options['cls'], six.string_types):
+        options['cls'] = import_string(options['cls'])
+    elif options['cls'] is None:
+        options.pop('cls')
 
     return json.dumps(data, **options)
 
