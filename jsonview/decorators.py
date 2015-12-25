@@ -4,6 +4,7 @@ import logging
 import traceback
 import warnings
 from functools import wraps
+from importlib import import_module
 
 from django import http
 from django.conf import settings
@@ -11,11 +12,12 @@ from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import got_request_exception
+from django.utils import six
+from django.utils.module_loading import import_string
 
-from . import compat
 from .exceptions import BadRequest
 
-json = compat.import_module(getattr(settings, 'JSON_MODULE', 'json'))
+json = import_module(getattr(settings, 'JSON_MODULE', 'json'))
 JSON = 'application/json'
 logger = logging.getLogger('django.request')
 logger.info('Using %s JSON module.', json.__name__)
@@ -25,8 +27,8 @@ def _dump_json(data):
     options = getattr(settings, 'JSON_OPTIONS', {})
 
     if 'cls' in options:
-        if isinstance(options['cls'], compat.string_types):
-            options['cls'] = compat.import_string(options['cls'])
+        if isinstance(options['cls'], six.string_types):
+            options['cls'] = import_string(options['cls'])
     else:
         try:
             use_django = getattr(settings, 'JSON_USE_DJANGO_SERIALIZER')
@@ -110,7 +112,7 @@ def json_view(*args, **kwargs):
             except http.Http404 as e:
                 blob = _dump_json({
                     'error': 404,
-                    'message': compat.text_type(e),
+                    'message': six.text_type(e),
                 })
                 logger.warning('Not found: %s', request.path,
                                extra={
@@ -127,13 +129,13 @@ def json_view(*args, **kwargs):
                     })
                 blob = _dump_json({
                     'error': 403,
-                    'message': compat.text_type(e),
+                    'message': six.text_type(e),
                 })
                 return http.HttpResponseForbidden(blob, content_type=JSON)
             except BadRequest as e:
                 blob = _dump_json({
                     'error': 400,
-                    'message': compat.text_type(e),
+                    'message': six.text_type(e),
                 })
                 return http.HttpResponseBadRequest(blob, content_type=JSON)
             except Exception as e:
@@ -142,7 +144,7 @@ def json_view(*args, **kwargs):
                     'message': 'An error occurred',
                 }
                 if settings.DEBUG:
-                    exc_data['message'] = compat.text_type(e)
+                    exc_data['message'] = six.text_type(e)
                     exc_data['traceback'] = traceback.format_exc()
 
                 blob = _dump_json(exc_data)
