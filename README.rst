@@ -37,6 +37,25 @@ Just import the decorator, use, and return a JSON-serializable object::
         }
 
 
+`Class-based views`_ (CBVs) can either use Django's
+``@method_decorator`` or can wrap the output of ``.as_view()``::
+
+    from django.utils.decorators import method_decorator
+    from jsonview.decorators import json_view
+
+
+    class MyView(View):
+        @method_decorator(json_view)
+        def dispatch(self, *args, **kwargs):
+            return super(MyView, self).dispatch(*args, **kwargs)
+
+    # or, in URLconf
+
+    patterns = [
+        url(r'^/my-view/$', json_view(MyView.as_view())),
+    ]
+
+
 Content Types
 -------------
 
@@ -277,3 +296,4 @@ Then run the tests with::
 .. _ujson: https://pypi.python.org/pypi/ujson
 .. _cjson: https://pypi.python.org/pypi/python-cjson
 .. _yajl: https://pypi.python.org/pypi/yajl
+.. _Class-based views: https://docs.djangoproject.com/en/1.9/topics/class-based-views/intro/

@@ -1,14 +1,19 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
+
 import json
 import sys
+from unittest import SkipTest
 
+import django
 from django import http
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
+from django.views.generic import View
 
 import mock
 
@@ -260,3 +265,47 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
         eq_(payload, res.content)
+
+    def test_method_decorator_on_dispatch(self):
+        class TV(View):
+            @method_decorator(json_view)
+            def dispatch(self, *a, **kw):
+                return super(TV, self).dispatch(*a, **kw)
+
+            def get(self, request):
+                return {'foo': 'bar'}
+
+        view = TV.as_view()
+        res = view(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(JSON, res['content-type'])
+        data = json.loads(res.content.decode('utf-8'))
+        eq_('bar', data['foo'])
+
+    def test_method_decorator_on_class(self):
+        if django.VERSION < (1, 9):
+            raise SkipTest('Feature added in Django 1.9')
+
+        @method_decorator(json_view, name='dispatch')
+        class TV(View):
+            def get(self, request):
+                return {'foo': 'bar'}
+
+        view = TV.as_view()
+        res = view(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(JSON, res['content-type'])
+        data = json.loads(res.content.decode('utf-8'))
+        eq_('bar', data['foo'])
+
+    def test_wrap_as_view(self):
+        class TV(View):
+            def get(self, request):
+                return {'foo': 'bar'}
+
+        view = json_view(TV.as_view())
+        res = view(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(JSON, res['content-type'])
+        data = json.loads(res.content.decode('utf-8'))
+        eq_('bar', data['foo'])
