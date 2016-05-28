@@ -1,10 +1,17 @@
 Changelog
 =========
 
+v1.0.0
+------
+
+- Remove deprecated JSON_USE_DJANGO_SERIALIZER setting.
+
+
 v0.5.1
 ------
 
 - Drop unnecesary log message on module init.
+- Drop compatibility for Django<1.8.
 
 
 v0.5.0
@@ -22,6 +29,7 @@ v0.4.3
 
 - Add setting to make Django's serializer optional when using 3rd party
   JSON modules.
+
 
 v0.4.2
 ------

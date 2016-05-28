@@ -235,7 +235,7 @@ encoder, use the ``cls`` option::
 ``JSON_OPTIONS['cls']`` may be a dotted string or a ``JSONEncoder``
 class.
 
-.. versionchanged:: 0.6
+.. versionchanged:: 1.0
 
 **If you are using a JSON module that does not support the ``cls``
 kwarg**, such as ujson, set the ``cls`` option to ``None``::
