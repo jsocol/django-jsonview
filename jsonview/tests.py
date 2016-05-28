@@ -236,7 +236,7 @@ class JsonViewTests(TestCase):
         payload = json.dumps({'datetime': now}, cls=DjangoJSONEncoder)
         eq_(b(payload), res.content)
 
-    @override_settings(JSON_USE_DJANGO_SERIALIZER=False)
+    @override_settings(JSON_OPTIONS={'cls': None})
     def test_datetime_no_serializer(self):
         now = timezone.now()
 
@@ -251,7 +251,24 @@ class JsonViewTests(TestCase):
 
     @override_settings(
         JSON_OPTIONS={'cls': 'jsonview.tests.CustomTestEncoder'})
-    def test_json_options(self):
+    def test_json_custom_serializer_string(self):
+        payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
+
+        class O(object):
+            def for_json(self):
+                return 'Custom JSON'
+
+        @json_view
+        def temp(req):
+            return {'foo': O()}
+
+        res = temp(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(payload, res.content)
+
+    @override_settings(
+        JSON_OPTIONS={'cls': CustomTestEncoder})
+    def test_json_custom_serializer_class(self):
         payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
 
         class O(object):
