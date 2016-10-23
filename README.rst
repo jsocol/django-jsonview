@@ -244,6 +244,12 @@ kwarg**, such as ujson, set the ``cls`` option to ``None``::
         'cls': None,
     }
 
+Default value of content-type is 'application/json'. You can change it vie the
+``JSON_DEFAULT_CONTENT_TYPE`` Django settings. For example, to add
+charset::
+
+   JSON_DEFAULT_CONTENT_TYPE = 'application/json; charset=utf-8'
+
 
 Atomic Requests
 ===============

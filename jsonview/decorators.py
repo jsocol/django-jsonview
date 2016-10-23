@@ -17,7 +17,7 @@ from django.utils.module_loading import import_string
 from .exceptions import BadRequest
 
 json = import_module(getattr(settings, 'JSON_MODULE', 'json'))
-JSON = 'application/json'
+JSON = getattr(settings, 'JSON_DEFAULT_CONTENT_TYPE', 'application/json')
 logger = logging.getLogger('django.request')
 
 
