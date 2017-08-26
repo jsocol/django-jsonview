@@ -22,7 +22,8 @@ logger = logging.getLogger('django.request')
 
 
 def _dump_json(data):
-    options = getattr(settings, 'JSON_OPTIONS', {})
+    options = {}
+    options.update(getattr(settings, 'JSON_OPTIONS', {}))
 
     # Use the DjangoJSONEncoder by default, unless cls is set to None.
     options.setdefault('cls', DjangoJSONEncoder)

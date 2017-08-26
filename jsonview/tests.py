@@ -250,6 +250,27 @@ class JsonViewTests(TestCase):
         payload = json.loads(res.content.decode('utf-8'))
         eq_(500, payload['error'])
 
+    @override_settings(JSON_OPTIONS={'cls': None})
+    def test_dont_mutate_json_settings(self):
+        """Don't mutate JSON settings during a request.
+
+        The second request should use the same settings as the first, so we
+        should get two 500s in a row.
+        """
+        now = timezone.now()
+
+        @json_view
+        def temp(req):
+            return {'datetime': now}
+
+        res = temp(rf.get('/'))
+        eq_(500, res.status_code)
+
+        # calling this a second time should still generate a 500 and not
+        # use the `DjangoJSONEncoder`
+        res2 = temp(rf.get('/'))
+        eq_(500, res2.status_code)
+
     @override_settings(
         JSON_OPTIONS={'cls': 'jsonview.tests.CustomTestEncoder'})
     def test_json_custom_serializer_string(self):
