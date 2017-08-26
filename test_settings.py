@@ -1,3 +1,8 @@
+import logging
+
+
+logging.disable(logging.CRITICAL)
+
 INSTALLED_APPS = ('jsonview',)
 
 SECRET_KEY = 'foo'
