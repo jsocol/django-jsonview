@@ -244,9 +244,9 @@ kwarg**, such as ujson, set the ``cls`` option to ``None``::
         'cls': None,
     }
 
-Default value of content-type is 'application/json'. You can change it vie the
-``JSON_DEFAULT_CONTENT_TYPE`` Django settings. For example, to add
-charset::
+Default value of content-type is 'application/json'. You can change it
+via the ``JSON_DEFAULT_CONTENT_TYPE`` Django settings. For example, to
+add charset::
 
    JSON_DEFAULT_CONTENT_TYPE = 'application/json; charset=utf-8'
 
@@ -270,8 +270,10 @@ Contributing
 
 `Pull requests`_ and issues_ welcome! I ask two simple things:
 
-* Tests, including the new ones you added, must pass. (See below.)
-* The ``flake8`` tool should not return any issues.
+- Tests, including the new ones you added, must pass. (See below.)
+- Coverage should not drop below 100. You can install ``coverage`` with
+  pip and run ``./run.sh coverage`` to check.
+- The ``flake8`` tool should not return any issues.
 
 
 Running Tests
