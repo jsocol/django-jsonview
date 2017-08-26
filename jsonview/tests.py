@@ -29,6 +29,7 @@ def eq_(a, b, msg=None):
     """From nose.tools.eq_."""
     assert a == b, msg or '%r != %r' % (a, b)
 
+
 if sys.version < '3':
     def b(x):
         return x
