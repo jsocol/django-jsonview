@@ -250,6 +250,13 @@ class JsonViewTests(TestCase):
         payload = json.loads(res.content.decode('utf-8'))
         eq_(500, payload['error'])
 
+        # calling this a second time should still generate a 500 and not
+        # use the `DjangoJSONEncoder`
+        res = temp(rf.get('/'))
+        eq_(500, res.status_code)
+        payload = json.loads(res.content.decode('utf-8'))
+        eq_(500, payload['error'])
+
     @override_settings(
         JSON_OPTIONS={'cls': 'jsonview.tests.CustomTestEncoder'})
     def test_json_custom_serializer_string(self):
