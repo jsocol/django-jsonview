@@ -276,13 +276,13 @@ class JsonViewTests(TestCase):
     def test_json_custom_serializer_string(self):
         payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
 
-        class O(object):
+        class Obj(object):
             def for_json(self):
                 return 'Custom JSON'
 
         @json_view
         def temp(req):
-            return {'foo': O()}
+            return {'foo': Obj()}
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
@@ -293,13 +293,13 @@ class JsonViewTests(TestCase):
     def test_json_custom_serializer_class(self):
         payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
 
-        class O(object):
+        class Obj(object):
             def for_json(self):
                 return 'Custom JSON'
 
         @json_view
         def temp(req):
-            return {'foo': O()}
+            return {'foo': Obj()}
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
