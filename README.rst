@@ -37,9 +37,20 @@ Just import the decorator, use, and return a JSON-serializable object::
         }
 
 
-`Class-based views`_ (CBVs) can either use Django's
-``@method_decorator`` or can wrap the output of ``.as_view()``::
+`Class-based views`_ (CBVs) can inherit from JsonView, use Django's
+``@method_decorator`` or wrap the output of ``.as_view()``::
 
+    # inherit from JsonView
+    from jsonview.views import JsonView
+
+
+    class MyView(JsonView):
+        def get_context_data(self, **kwargs):
+            context = super(MyView, self).get_context_data(**kwargs)
+            context['my_key'] = 'some value'
+            return context
+
+    # or, method decorator
     from django.utils.decorators import method_decorator
     from jsonview.decorators import json_view
 
