@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v1.2.0
+------
+
+- Add JsonView CBV base class (#39)
+
 v1.1.0
 ------
 
