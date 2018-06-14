@@ -19,6 +19,7 @@ import mock
 
 from .decorators import json_view
 from .exceptions import BadRequest
+from .views import JsonView
 
 
 JSON = 'application/json'
@@ -336,6 +337,34 @@ class JsonViewTests(TestCase):
         eq_(JSON, res['content-type'])
         data = json.loads(res.content.decode('utf-8'))
         eq_('bar', data['foo'])
+
+    def test_view_class_get(self):
+        class MyView(JsonView):
+            def get_context_data(self, **kwargs):
+                context = super(MyView, self).get_context_data(**kwargs)
+                context['foo'] = 'bar'
+                return context
+
+        view = MyView.as_view()
+
+        res = view(rf.get('/'))
+        eq_(200, res.status_code)
+        eq_(JSON, res['content-type'])
+        data = json.loads(res.content.decode('utf-8'))
+        eq_('bar', data['foo'])
+
+    def test_view_class_post(self):
+        class MyView(JsonView):
+            def post(self, request, *args, **kwargs):
+                return self.get(request, *args, **kwargs)
+
+        view = MyView.as_view()
+
+        res = view(rf.post('/'))
+        eq_(200, res.status_code)
+        eq_(JSON, res['content-type'])
+        data = json.loads(res.content.decode('utf-8'))
+        eq_({}, data)
 
     def test_wrap_as_view(self):
         class TV(View):
