@@ -199,7 +199,7 @@ object (or subclass) it will be passed through unchanged, e.g.::
 .. note::
 
    ``@require_POST`` and the other HTTP method decorators  work by
-   *returning* a response, rather than *raising*, an an exception, so
+   *returning* a response, rather than *raising*, an exception, so
    ``HttpResponseNotAllowed`` is handled specially.
 
 
