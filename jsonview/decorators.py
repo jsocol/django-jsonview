@@ -153,9 +153,15 @@ def json_view(*args, **kwargs):
                 # the BaseHandler doesn't get to send this signal. It sets the
                 # sender argument to self.__class__, in case the BaseHandler
                 # is subclassed.
-                got_request_exception.send(sender=BaseHandler, request=request)
+                got_request_exception.send(
+                    sender=BaseHandler,
+                    request=request,
+                    exception=e,
+                    exc_data=exc_data
+                )
                 return http.HttpResponseServerError(blob, content_type=JSON)
         return _wrapped
+
     if len(args) == 1 and callable(args[0]):
         return decorator(args[0])
     else:
