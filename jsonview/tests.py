@@ -190,6 +190,25 @@ class JsonViewTests(TestCase):
         assert s.send.called
         eq_(JSON, res['content-type'])
 
+    @override_settings(DEBUG=True)
+    def test_signal_sent_with_propagated_exception(self):
+        from django.core.signals import got_request_exception
+
+        def assertion_handler(sender, request, **kwargs):
+            for key in ['exception', 'exc_data']:
+                assert key in kwargs
+            for key in ['error', 'message', 'traceback']:
+                assert key in kwargs['exc_data']
+            assert isinstance(kwargs['exception'], Exception)
+
+        got_request_exception.connect(assertion_handler)
+
+        @json_view
+        def temp(req):
+            1/0  # sic.
+
+        temp(rf.get('/'))
+
     def test_unicode_error(self):
         @json_view
         def temp(req):
