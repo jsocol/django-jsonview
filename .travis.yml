@@ -8,13 +8,18 @@ python:
  - "pypy3.5"
 env:
  - DJANGO_VERSION=1.11
- - DJANGO_VERSION=2.0
+ - DJANGO_VERSION=2.1
+ - DJANGO_VERSION=2.2
 matrix:
   exclude:
     - python: "2.7"
-      env: DJANGO_VERSION=2.0
+      env: DJANGO_VERSION=2.1
+    - python: "2.7"
+      env: DJANGO_VERSION=2.2
     - python: "pypy"
-      env: DJANGO_VERSION=2.0
+      env: DJANGO_VERSION=2.1
+    - python: "pypy"
+      env: DJANGO_VERSION=2.2
 install:
  - pip install -q "Django>=${DJANGO_VERSION},<${DJANGO_VERSION}.99"
  - pip install -q flake8 coverage
