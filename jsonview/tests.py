@@ -17,7 +17,7 @@ from django.views.generic import View
 
 import mock
 
-from .decorators import json_view
+from .decorators import json_view, json_request
 from .exceptions import BadRequest
 from .views import JsonView
 
@@ -396,3 +396,101 @@ class JsonViewTests(TestCase):
         eq_(JSON, res['content-type'])
         data = json.loads(res.content.decode('utf-8'))
         eq_('bar', data['foo'])
+
+
+class JsonRequestTests(TestCase):
+    def test_application_json(self):
+        data = {
+            'foo': 'bar',
+            'baz': 'qux',
+            'quz': [{'foo': 'bar'}],
+        }
+
+        @json_request
+        def temp(req):
+            return req.data
+
+        res = temp(rf.post(
+                '/',
+                data=json.dumps(data),
+                content_type='application/json'
+            ))
+        eq_(res, data)
+
+    def test_get_requests(self):
+        data = {
+            'foo': 'bar',
+            'baz': '0'
+        }
+
+        @json_request(assume_json=False)
+        def temp(req):
+            return req.data
+
+        res = temp(rf.get('/?foo=bar&baz=0'))
+        eq_(res, data)
+
+    def test_post_requests(self):
+        data = {
+            'foo': 'bar',
+            'baz': '0'
+        }
+
+        @json_request(assume_json=False)
+        def temp(req):
+            return req.data
+
+        # test application/x-www-form-urlencoded
+        res = temp(rf.post(
+                '/',
+                data='foo=bar&baz=0',
+                content_type='application/x-www-form-urlencoded'
+            ))
+        eq_(res, data)
+
+        # test multipart/form-data
+        res = temp(rf.post('/', data=data, files=None))
+        eq_(res, data)
+
+    def test_assume_json(self):
+        data = {
+            'foo': 'bar',
+            'baz': '0'
+        }
+
+        @json_request(assume_json=True)
+        def temp(req):
+            return req.data
+
+        @json_request(assume_json=False)
+        def temp_2(req):
+            return req.data
+
+        # test get request
+        res = temp(rf.get('/?foo=bar&baz=0'))
+        eq_(res, {})
+
+        res = temp_2(rf.get('/?foo=bar&baz=0'))
+        eq_(res, data)
+
+        # test application/x-www-form-urlencoded
+        res = temp(rf.post(
+                '/',
+                data='foo=bar&baz=0',
+                content_type='application/x-www-form-urlencoded'
+            ))
+        eq_(res, {})
+
+        res = temp_2(rf.post(
+                '/',
+                data='foo=bar&baz=0',
+                content_type='application/x-www-form-urlencoded'
+            ))
+        eq_(res, data)
+
+        # test multipart/form-data
+        res = temp(rf.post('/', data=data, files=None))
+        eq_(res, {})
+
+        res = temp_2(rf.post('/', data=data, files=None))
+        eq_(res, data)
