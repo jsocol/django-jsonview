@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v1.3.0
+------
+
+- Propagate exception details to signal (#43)
+- Test against Django 2.1 and 2.2
+
 v1.2.0
 ------
 
