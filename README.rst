@@ -220,8 +220,6 @@ methods.
 Configuring JSON Output
 -----------------------
 
-.. versionadded:: 0.5
-
 Additional keyword arguments can be passed to ``json.dumps()`` via the
 ``JSON_OPTIONS = {}`` Django setting. For example, to pretty-print JSON
 output::
@@ -245,8 +243,6 @@ encoder, use the ``cls`` option::
 
 ``JSON_OPTIONS['cls']`` may be a dotted string or a ``JSONEncoder``
 class.
-
-.. versionchanged:: 1.0
 
 **If you are using a JSON module that does not support the ``cls``
 kwarg**, such as ujson, set the ``cls`` option to ``None``::
