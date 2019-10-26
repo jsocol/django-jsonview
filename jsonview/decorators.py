@@ -166,3 +166,31 @@ def json_view(*args, **kwargs):
         return decorator(args[0])
     else:
         return decorator
+
+
+def json_request(*args, **kwargs):
+    assume_json = bool(kwargs.get('assume_json', True))
+
+    def decorator(f):
+        @wraps(f)
+        def _wrapped(request, *a, **kw):
+            request.data = {}
+            if assume_json or request.META.get('CONTENT_TYPE') == JSON:
+                try:
+                    if isinstance(request.body, bytes):
+                        request.data = json.loads(request.body.decode('ascii'))
+                    else:
+                        request.data = json.loads(request.body)
+                except:
+                    pass
+            elif request.method == 'GET':
+                request.data = request.GET.dict()
+            elif request.method == 'POST':
+                request.data = request.POST.dict()
+            return f(request, *a, **kw)
+        return _wrapped
+
+    if len(args) == 1 and callable(args[0]):
+        return decorator(args[0])
+    else:
+        return decorator
