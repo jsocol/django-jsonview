@@ -16,6 +16,8 @@ setup(
     include_package_data=True,
     package_data={'': ['README.rst']},
     zip_safe=False,
+    install_requires=["django>=2.0.0"],
+    tests_require=["coverage"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',

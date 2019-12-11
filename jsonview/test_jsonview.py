@@ -1,10 +1,8 @@
 from __future__ import absolute_import, unicode_literals
-
+import codecs
 import json
-import sys
-from unittest import SkipTest
+from unittest import mock
 
-import django
 from django import http
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
@@ -14,8 +12,6 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
 from django.views.generic import View
-
-import mock
 
 from .decorators import json_view
 from .exceptions import BadRequest
@@ -31,14 +27,8 @@ def eq_(a, b, msg=None):
     assert a == b, msg or '%r != %r' % (a, b)
 
 
-if sys.version < '3':
-    def b(x):
-        return x
-else:
-    import codecs
-
-    def b(x):
-        return codecs.latin_1_encode(x)[0]
+def b(x):
+    return codecs.latin_1_encode(x)[0]
 
 
 class CustomTestEncoder(DjangoJSONEncoder):
@@ -292,7 +282,7 @@ class JsonViewTests(TestCase):
         eq_(500, res2.status_code)
 
     @override_settings(
-        JSON_OPTIONS={'cls': 'jsonview.tests.CustomTestEncoder'})
+        JSON_OPTIONS={'cls': 'jsonview.test_jsonview.CustomTestEncoder'})
     def test_json_custom_serializer_string(self):
         payload = json.dumps({'foo': 'Custom JSON'}).encode('utf-8')
 
@@ -306,6 +296,24 @@ class JsonViewTests(TestCase):
 
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
+        eq_(payload, res.content)
+
+    @override_settings(
+        JSON_OPTIONS={'cls': 'jsonview.test_jsonview.CustomTestEncoder'})
+    def test_json_custom_serializer_string__no_for_json_function(self):
+        payload = json.dumps(
+            {"error": 500, "message": "An error occurred"}
+        ).encode('utf-8')
+
+        class Obj(object):
+            pass
+
+        @json_view
+        def temp(req):
+            return {'foo': Obj()}
+
+        res = temp(rf.get('/'))
+        eq_(500, res.status_code)
         eq_(payload, res.content)
 
     @override_settings(
@@ -342,9 +350,6 @@ class JsonViewTests(TestCase):
         eq_('bar', data['foo'])
 
     def test_method_decorator_on_class(self):
-        if django.VERSION < (1, 9):
-            raise SkipTest('Feature added in Django 1.9')
-
         @method_decorator(json_view, name='dispatch')
         class TV(View):
             def get(self, request):

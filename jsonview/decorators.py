@@ -11,7 +11,6 @@ from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import got_request_exception
-from django.utils import six
 from django.utils.module_loading import import_string
 
 from .exceptions import BadRequest
@@ -27,7 +26,7 @@ def _dump_json(data):
 
     # Use the DjangoJSONEncoder by default, unless cls is set to None.
     options.setdefault('cls', DjangoJSONEncoder)
-    if isinstance(options['cls'], six.string_types):
+    if isinstance(options['cls'], str):
         options['cls'] = import_string(options['cls'])
     elif options['cls'] is None:
         options.pop('cls')
@@ -101,7 +100,7 @@ def json_view(*args, **kwargs):
             except http.Http404 as e:
                 blob = _dump_json({
                     'error': 404,
-                    'message': six.text_type(e),
+                    'message': str(e),
                 })
                 logger.warning('Not found: %s', request.path,
                                extra={
@@ -118,13 +117,13 @@ def json_view(*args, **kwargs):
                     })
                 blob = _dump_json({
                     'error': 403,
-                    'message': six.text_type(e),
+                    'message': str(e),
                 })
                 return http.HttpResponseForbidden(blob, content_type=JSON)
             except BadRequest as e:
                 blob = _dump_json({
                     'error': 400,
-                    'message': six.text_type(e),
+                    'message': str(e),
                 })
                 return http.HttpResponseBadRequest(blob, content_type=JSON)
             except Exception as e:
@@ -133,7 +132,7 @@ def json_view(*args, **kwargs):
                     'message': 'An error occurred',
                 }
                 if settings.DEBUG:
-                    exc_data['message'] = six.text_type(e)
+                    exc_data['message'] = str(e)
                     exc_data['traceback'] = traceback.format_exc()
 
                 blob = _dump_json(exc_data)
