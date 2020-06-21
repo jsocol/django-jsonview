@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signals import got_request_exception
-from django.utils import six
+import six
 from django.utils.module_loading import import_string
 
 from .exceptions import BadRequest
