@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.0.0
+------
+
+- Update Django versions to 2.1, 2.2, 3.0
+
 v1.3.1
 ------
 
