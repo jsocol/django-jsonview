@@ -180,7 +180,7 @@ def json_request(*args, **kwargs):
                         request.data = json.loads(request.body.decode('ascii'))
                     else:
                         request.data = json.loads(request.body)
-                except:
+                except Exception:
                     pass
             elif request.method == 'GET':
                 request.data = request.GET.dict()
