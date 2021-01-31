@@ -1,7 +1,4 @@
-from __future__ import absolute_import, unicode_literals
-
 import json
-import sys
 from unittest import SkipTest
 
 import django
@@ -29,16 +26,6 @@ rf = RequestFactory()
 def eq_(a, b, msg=None):
     """From nose.tools.eq_."""
     assert a == b, msg or '%r != %r' % (a, b)
-
-
-if sys.version < '3':
-    def b(x):
-        return x
-else:
-    import codecs
-
-    def b(x):
-        return codecs.latin_1_encode(x)[0]
 
 
 class CustomTestEncoder(DjangoJSONEncoder):
@@ -255,7 +242,7 @@ class JsonViewTests(TestCase):
         res = temp(rf.get('/'))
         eq_(200, res.status_code)
         payload = json.dumps({'datetime': now}, cls=DjangoJSONEncoder)
-        eq_(b(payload), res.content)
+        eq_(payload, res.content)
 
     @override_settings(JSON_OPTIONS={'cls': None})
     def test_datetime_no_serializer(self):
