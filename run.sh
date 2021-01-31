@@ -18,17 +18,20 @@ usage() {
 
 case "$CMD" in
     "test" )
-        django-admin.py test jsonview $@
+        echo "Django version: $(python -m django --version)"
+        python -m django test jsonview "$@"
         ;;
     "shell" )
-        django-admin.py shell $@
+        python -m django shell "$@"
         ;;
     "check" )
-        flake8 jsonview $@
+        echo "Flake8 version: $(flake8 --version)"
+        flake8 jsonview "$@"
         ;;
     "coverage" )
-        coverage run `which django-admin.py` test jsonview $@
-        coverage report \
+        echo "Django version: $(python -m django --version)"
+        coverage3 run -m django test jsonview "$@"
+        coverage3 report \
             -m \
             --include=jsonview/* \
             --omit=jsonview/tests.py \
