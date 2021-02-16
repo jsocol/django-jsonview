@@ -22,23 +22,23 @@ No need to add to ``INSTALLED_APPS`` or anything.
 Usage
 =====
 
-Just import the decorator, use, and return a JSON-serializable object::
+Just import the decorator, use, and return a JSON-serializable object
+            
+.. code-block:: python
 
-.. code:: python
+        from jsonview.decorators import json_view
 
-    from jsonview.decorators import json_view
-
-    @json_view
-    def my_view(request):
-        return {
-            'foo': 'bar',
-        }
+        @json_view
+        def my_view(request):
+            return {
+                'foo': 'bar',
+            }
 
 
 `Class-based views`_ (CBVs) can inherit from JsonView, use Django's
-``@method_decorator`` or wrap the output of ``.as_view()``::
+``@method_decorator`` or wrap the output of ``.as_view()``
 
-.. code:: python
+.. code-block:: python
 
     # inherit from JsonView
     from jsonview.views import JsonView
@@ -72,9 +72,9 @@ Content Types
 
 If you need to return a content type other than the standard
 ``application/json``, you can specify that in the decorator with the
-``content_type`` argument, for example::
+``content_type`` argument, for example
 
-.. code:: python
+.. code-block:: python
 
     from jsonview.decorators import json_view
 
@@ -102,9 +102,9 @@ cases, including:
 
 Any of these exceptions will return the correct status code (i.e., 404,
 403, 405, 400, 500) a Content-Type of ``application/json``, and a
-response body that looks like::
+response body that looks like
 
-.. code:: python
+.. code-block:: python
 
     json.dumps({
         'error': STATUS_CODE,
@@ -156,9 +156,9 @@ Status Codes
 
 If you need to return a different HTTP status code, just return two
 values instead of one. The first is your serializable object, the second
-is the integer status code::
+is the integer status code
 
-.. code:: python
+.. code-block:: python
 
     @json_view
     def myview(request):
@@ -175,9 +175,7 @@ Extra Headers
 You can add custom headers to the response by returning a tuple of three
 values: an object, a status code, and a dictionary of headers.
 
-::
-
-.. code:: python
+.. code-block:: python
 
     @json_view
     def myview(request):
@@ -191,9 +189,9 @@ Raw Return Values
 
 To make it possible to cache JSON responses as strings (and because they
 aren't JSON serializable anyway) if you return an ``HttpResponse``
-object (or subclass) it will be passed through unchanged, e.g.::
+object (or subclass) it will be passed through unchanged, e.g.
 
-.. code:: python
+.. code-block:: python
 
     from django import http
     from jsonview.decorators import JSON
@@ -219,9 +217,9 @@ Alternative JSON Implementations
 There is a healthy collection of JSON parsing and generating libraries
 out there. By default, it will use the old standby, the stdlib ``json``
 module. But, if you'd rather use ujson_, or cjson_ or yajl_, you should
-go for it. Just add this to your Django settings::
+go for it. Just add this to your Django settings
 
-.. code:: python
+.. code-block:: python
 
     JSON_MODULE = 'ujson'
 
@@ -234,26 +232,26 @@ Configuring JSON Output
 
 Additional keyword arguments can be passed to ``json.dumps()`` via the
 ``JSON_OPTIONS = {}`` Django setting. For example, to pretty-print JSON
-output::
+output
 
-.. code:: python
+.. code-block:: python
 
     JSON_OPTIONS = {
         'indent': 4,
     }
 
-Or to compactify it::
+Or to compactify it
 
-.. code:: python
+.. code-block:: python
 
     JSON_OPTIONS = {
         'separators': (',', ':'),
     }
 
 jsonview uses ``DjangoJSONEncoder`` by default. To use a different JSON
-encoder, use the ``cls`` option::
+encoder, use the ``cls`` option
 
-.. code:: python
+.. code-block:: python
 
     JSON_OPTIONS = {
         'cls': 'path.to.MyJSONEncoder',
@@ -263,9 +261,9 @@ encoder, use the ``cls`` option::
 class.
 
 **If you are using a JSON module that does not support the ``cls``
-kwarg**, such as ujson, set the ``cls`` option to ``None``::
+kwarg**, such as ujson, set the ``cls`` option to ``None``
 
-.. code:: python
+.. code-block:: python
 
     JSON_OPTIONS = {
         'cls': None,
@@ -273,9 +271,9 @@ kwarg**, such as ujson, set the ``cls`` option to ``None``::
 
 Default value of content-type is 'application/json'. You can change it
 via the ``JSON_DEFAULT_CONTENT_TYPE`` Django settings. For example, to
-add charset::
+add charset
 
-.. code:: python
+.. code-block:: python
 
    JSON_DEFAULT_CONTENT_TYPE = 'application/json; charset=utf-8'
 
@@ -286,7 +284,7 @@ Atomic Requests
 Because ``@json_view`` catches exceptions, the normal Django setting
 ``ATOMIC_REQUESTS`` does not correctly cause a rollback. This can be
 worked around by explicitly setting ``@transaction.atomic`` *below* the
-``@json_view`` decorator, e.g.::
+``@json_view`` decorator, e.g.
 
 .. code:: python
 
