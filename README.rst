@@ -26,13 +26,13 @@ Just import the decorator, use, and return a JSON-serializable object
             
 .. code-block:: python
 
-        from jsonview.decorators import json_view
+    from jsonview.decorators import json_view
 
-        @json_view
-        def my_view(request):
-            return {
-                'foo': 'bar',
-            }
+    @json_view
+    def my_view(request):
+        return {
+            'foo': 'bar',
+        }
 
 
 `Class-based views`_ (CBVs) can inherit from JsonView, use Django's
