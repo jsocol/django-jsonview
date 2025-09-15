@@ -386,7 +386,7 @@ class JsonViewTests(TestCase):
 
 
 class JsonRequestTests(TestCase):
-    def test_application_json(self):
+    def test_with_json_content_type(self):
         data = {
             'foo': 'bar',
             'baz': 'qux',
@@ -395,7 +395,7 @@ class JsonRequestTests(TestCase):
 
         @json_request
         def temp(req):
-            return req.data
+            return req.json_data
 
         res = temp(rf.post(
                 '/',
@@ -404,42 +404,7 @@ class JsonRequestTests(TestCase):
             ))
         eq_(res, data)
 
-    def test_get_requests(self):
-        data = {
-            'foo': 'bar',
-            'baz': '0'
-        }
-
-        @json_request(assume_json=False)
-        def temp(req):
-            return req.data
-
-        res = temp(rf.get('/?foo=bar&baz=0'))
-        eq_(res, data)
-
-    def test_post_requests(self):
-        data = {
-            'foo': 'bar',
-            'baz': '0'
-        }
-
-        @json_request(assume_json=False)
-        def temp(req):
-            return req.data
-
-        # test application/x-www-form-urlencoded
-        res = temp(rf.post(
-                '/',
-                data='foo=bar&baz=0',
-                content_type='application/x-www-form-urlencoded'
-            ))
-        eq_(res, data)
-
-        # test multipart/form-data
-        res = temp(rf.post('/', data=data, files=None))
-        eq_(res, data)
-
-    def test_assume_json(self):
+    def test_without_json_content_type(self):
         data = {
             'foo': 'bar',
             'baz': '0'
@@ -447,18 +412,24 @@ class JsonRequestTests(TestCase):
 
         @json_request(assume_json=True)
         def temp(req):
-            return req.data
+            return req.json_data
+
+        res = temp(rf.post(
+                '/',
+                data=json.dumps(data),
+                content_type='application/x-www-form-urlencoded'
+            ))
+        eq_(res, data)
+
+    def test_without_json_data(self):
+        data = {
+            'foo': 'bar',
+            'baz': '0'
+        }
 
         @json_request(assume_json=False)
-        def temp_2(req):
-            return req.data
-
-        # test get request
-        res = temp(rf.get('/?foo=bar&baz=0'))
-        eq_(res, {})
-
-        res = temp_2(rf.get('/?foo=bar&baz=0'))
-        eq_(res, data)
+        def temp(req):
+            return req.json_data
 
         # test application/x-www-form-urlencoded
         res = temp(rf.post(
